@@ -1,111 +1,111 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1D5FA6">
-<style>body{margin:0}:root{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}</style>
-<title>Home Base</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b1d1a" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Home">
+<title>Ghislain's Apps</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter+Tight:wght@400;500;600&display=swap">
 <style>
-/* Layout: site header with section links, a row of live dashboards, then quieter lists by theme. */
-:root {
-  --bg: #F2F5F8; --surface: #FFFFFF; --ink: #15202B; --muted: #5C6B7A; --line: #D6DDE5;
-  --accent: #1D5FA6; --accent-soft: #E3EDF8;
-  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+/* Layout: fixed sidebar of apps on the left, the selected app filling the right. On phones the sidebar becomes a slide-in drawer. */
+:root{
+  --bg:#f4f1ea; --side:#ebe6db; --surface:#fbf9f4; --ink:#2b2a26; --muted:#77736a; --line:#dcd5c7;
+  --accent:#5f7a5f; --accent-soft:#dfe6d9;
+  --display:"Fraunces",Georgia,serif; --body:"Inter Tight",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0F151B; --surface: #172029; --ink: #E7EDF3; --muted: #93A2B1; --line: #2A3743;
-    --accent: #74ABEA; --accent-soft: #1C2C3E; color-scheme: dark;
-  }
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1b1d1a; --side:#151714; --surface:#22251f; --ink:#e9e4d8; --muted:#9c978b; --line:#30342d;
+  --accent:#9cb894; --accent-soft:#2c3529; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;display:flex;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+aside{width:250px;flex:none;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top,0px)) 12px calc(14px + env(safe-area-inset-bottom,0px));gap:14px;overflow-y:auto}
+.brand{font-family:var(--display);font-weight:600;font-size:21px;padding:0 10px}
+.group{display:flex;flex-direction:column;gap:2px}
+.group h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:6px 10px 4px}
+.item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;font-size:14.5px;line-height:1.25}
+.item:hover{background:var(--accent-soft)}
+.item[aria-current="true"]{background:var(--accent);color:var(--surface);font-weight:600}
+.item span{flex:1;min-width:0}
+.item .ext{font-size:12px;color:var(--muted);flex:none}
+.item[aria-current="true"] .ext{color:inherit}
+.foot{margin-top:auto;font-size:12px;color:var(--muted);padding:0 10px}
+main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.top{display:none}
+iframe{flex:1;width:100%;border:0;background:var(--surface)}
+.outside{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.outside div{max-width:340px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.outside h1{font-family:var(--display);font-weight:600;font-size:26px;margin:0}
+.outside p{margin:0;color:var(--muted);line-height:1.5}
+.open{display:inline-block;background:var(--accent);color:var(--surface);text-decoration:none;font-weight:600;padding:11px 20px;border-radius:999px}
+.scrim{display:none}
+@media (max-width:760px){
+  aside{position:fixed;inset:0 auto 0 0;z-index:3;width:82%;max-width:300px;transform:translateX(-100%);transition:transform .2s ease;box-shadow:0 0 40px rgba(0,0,0,.25)}
+  body.menu aside{transform:none}
+  body.menu .scrim{display:block;position:fixed;inset:0;z-index:2;background:rgba(0,0,0,.3)}
+  .top{display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px;background:var(--side);border-bottom:1px solid var(--line)}
+  .top button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px}
+  .top b{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
-:root[data-theme="dark"] {
-  --bg: #0F151B; --surface: #172029; --ink: #E7EDF3; --muted: #93A2B1; --line: #2A3743;
-  --accent: #74ABEA; --accent-soft: #1C2C3E; color-scheme: dark;
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
-.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg); border-bottom: 1px solid var(--line); }
-.bar-in { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 12px; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; }
-.brand { font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
-nav { display: flex; flex-wrap: wrap; gap: 4px 14px; }
-nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
-nav a:hover { color: var(--accent); }
-a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.wrap { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 56px; display: flex; flex-direction: column; gap: 32px; }
-h1 { font-family: var(--display); font-weight: 700; font-size: clamp(1.7rem, 6vw, 2.4rem); line-height: 1.1; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
-.sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
-section { display: flex; flex-direction: column; gap: 12px; min-width: 0; scroll-margin-top: 72px; }
-h2 { font-family: var(--display); font-weight: 500; font-size: 1.1rem; margin: 0; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
-.card { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: 10px; padding: 16px; text-decoration: none; color: var(--ink); min-width: 0; }
-.card:hover { border-color: var(--accent); }
-.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
-.card strong { font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1.2; }
-.card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
-.go { margin-top: auto; color: var(--accent); font-weight: 600; font-size: 0.9rem; }
-.rows { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
-.row { display: flex; gap: 12px; justify-content: space-between; align-items: baseline; padding: 12px 16px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
-.row:last-child { border-bottom: 0; }
-.row:hover span:first-child { color: var(--accent); }
-.row span:first-child { font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
-.row .when { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
-.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 20px 16px; color: var(--muted); margin: 0; }
+@media (prefers-reduced-motion:reduce){aside{transition:none}}
 </style>
-</head><body>
-
-<div class="bar"><div class="bar-in">
-  <span class="brand">Home Base</span>
-  <nav id="nav" aria-label="Sections"></nav>
-</div></div>
-
-<div class="wrap">
-  <header>
-    <h1>Everything you've built, in one place</h1>
-    <p class="sub" id="asof"></p>
-  </header>
-  <div id="content"><p class="empty">Your dashboards will appear here as cards. Tap one to open it.</p></div>
-</div>
-
+</head>
+<body>
+<aside id="side" aria-label="Apps">
+  <div class="brand">My apps</div>
+  <nav id="nav"></nav>
+  <div class="foot">↗ opens in Claude</div>
+</aside>
+<div class="scrim" id="scrim"></div>
+<main>
+  <div class="top"><button id="menu" aria-label="Show apps">☰ Apps</button><b id="cur"></b></div>
+  <div id="view" style="flex:1;display:flex;min-height:0"></div>
+</main>
 <script>
-(function () {
-  var GROUPS = ["Learning", "Money", "Trips", "AXION", "Other"], links = [{"title": "Kotoba Deck", "desc": "Japanese flashcards with audio, N5 to N3.", "featured": true, "group": "Learning", "order": 1, "updated": "2026-10-12", "url": "https://ghisfit.github.io/Kotoba-deck/"}, {"title": "Net Worth Ledger", "desc": "Monthly balances across Japan, Revolut and France.", "featured": true, "group": "Money", "order": 2, "updated": "2026-10-04", "url": "https://claude.ai/artifact/Ch36gd7cMiUQiTKsHtkhA9"}, {"title": "Annonces Montpellier", "desc": "Apartments for sale under €120,000, with rent against loan payment.", "featured": true, "group": "Money", "order": 3, "updated": "2026-10-04", "url": "https://claude.ai/artifact/4VK7XT2L4CB1LZmzxHFq7d"}, {"title": "Taipei Trip", "desc": "Taiwan trip, 21 to 24 November.", "featured": true, "group": "Trips", "order": 4, "updated": "2026-09-28", "url": "https://claude.ai/artifact/5jbm2Le6PykXq7kS5FAF18"}, {"title": "Argent, dépenses et cartes — plan 2026", "group": "Money", "updated": "2026-09-22", "url": "https://claude.ai/artifact/9TUtZNU3ecLusTCBCpnn7z"}, {"title": "AXION First Ten Days", "group": "AXION", "updated": "2026-10-03", "url": "https://claude.ai/artifact/NMnH1cZTv2ypczeK7do2fQ"}, {"title": "AXION Journey Simulation", "group": "AXION", "updated": "2026-09-28", "url": "https://claude.ai/artifact/4WibWEnGBhsJkTjcKJuxVx"}, {"title": "AXION Versions to Learn", "group": "AXION", "updated": "2026-09-28", "url": "https://claude.ai/artifact/36BF5p3kduuaEeRpA8Ga62"}, {"title": "AXION Weekly Review", "group": "AXION", "updated": "2026-09-27", "url": "https://claude.ai/artifact/BiqwztWeH8R8Vp6B9tnJ3R"}, {"title": "AXION Install Path", "group": "AXION", "updated": "2026-09-26", "url": "https://claude.ai/artifact/XyJjAgbAoEGwV3ahw3rPpM"}, {"title": "Axion Audit", "group": "AXION", "updated": "2026-09-24", "url": "https://claude.ai/artifact/GMyio2F4Uif87ioaPWDjyB"}, {"title": "AXION Design Pass", "group": "AXION", "updated": "2026-08-29", "url": "https://claude.ai/artifact/EeBENVnMxkDXx1bPd1dhQp"}, {"title": "AXION Weekly Review (August)", "group": "AXION", "updated": "2026-08-15", "url": "https://claude.ai/artifact/Qq6iT2M6o1MpiCQ5BnZQhA"}, {"title": "Push Copy Benchmark", "group": "Other", "updated": "2026-09-27", "url": "https://claude.ai/artifact/SdpfEUeaKMS87UXTnbtKJc"}, {"title": "Morning Bell", "group": "Other", "updated": "2026-09-25", "url": "https://claude.ai/artifact/BVg1CEk97LWDpuLkhLV89X"}, {"title": "Now vs After Deploy", "group": "Other", "updated": "2026-08-31", "url": "https://claude.ai/artifact/9zAwNAegDDh8urj9xrAyTv"}, {"title": "Three Skins for Lift", "group": "Other", "updated": "2026-08-31", "url": "https://claude.ai/artifact/PGuLaSJDCEnQPpv6HeW9DX"}];
-  function $(id) { return document.getElementById(id); }
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function ok(u) { return /^https:\/\//.test(String(u || "")); }
-  function slug(g) { return String(g).toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
-
-  function render() {
-    var good = links.filter(function (l) { return ok(l.url) && l.title; });
-    if (!good.length) { $("asof").textContent = "No pages listed yet. Ask Claude to add your artifacts."; return; }
-    $("asof").textContent = good.length + " apps and pages. Links to Claude pages open in Claude.";
-    var feat = good.filter(function (l) { return l.featured; }).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
-    var groups = GROUPS.slice();
-    good.forEach(function (l) { if (l.group && groups.indexOf(l.group) < 0) groups.push(l.group); });
-    var html = "", nav = [];
-    if (feat.length) {
-      nav.push('<a href="#dashboards">Dashboards</a>');
-      html += '<section id="dashboards"><h2>Live dashboards</h2><div class="grid">' + feat.map(function (l) {
-        return '<a class="card" href="' + esc(l.url) + '" target="_blank" rel="noopener"><span class="label">' + esc(l.group || "") + "</span><strong>" +
-          esc(l.title) + "</strong>" + (l.desc ? "<p>" + esc(l.desc) + "</p>" : "") + '<span class="go">Open →</span></a>';
-      }).join("") + "</div></section>";
-    }
-    groups.forEach(function (g) {
-      var items = good.filter(function (l) { return l.group === g && !l.featured; })
-        .sort(function (a, b) { return String(b.updated || "").localeCompare(String(a.updated || "")); });
-      if (!items.length) return;
-      nav.push('<a href="#' + slug(g) + '">' + esc(g) + "</a>");
-      html += '<section id="' + slug(g) + '"><h2>' + esc(g) + '</h2><div class="rows">' + items.map(function (l) {
-        return '<a class="row" href="' + esc(l.url) + '" target="_blank" rel="noopener"><span>' + esc(l.title) + '</span><span class="when">' + esc(l.updated || "") + "</span></a>";
-      }).join("") + "</div></section>";
-    });
-    $("nav").innerHTML = nav.join("");
-    $("content").innerHTML = html;
-    $("content").style.display = "flex"; $("content").style.flexDirection = "column"; $("content").style.gap = "32px";
-  }
-
-  render();
-})();
+const APPS=[
+ {g:"Daily",t:"Kotoba Deck",u:"/Kotoba-deck/",d:"Japanese flashcards"},
+ {g:"Money",t:"Net Worth Ledger",u:"https://claude.ai/artifact/Ch36gd7cMiUQiTKsHtkhA9",d:"Monthly balances across Japan, Revolut and France."},
+ {g:"Money",t:"Annonces Montpellier",u:"https://claude.ai/artifact/4VK7XT2L4CB1LZmzxHFq7d",d:"Apartments for sale under €120,000."},
+ {g:"Money",t:"Plan 2026",u:"https://claude.ai/artifact/9TUtZNU3ecLusTCBCpnn7z",d:"Argent, dépenses et cartes."},
+ {g:"Trips",t:"Taipei Trip",u:"https://claude.ai/artifact/5jbm2Le6PykXq7kS5FAF18",d:"Taiwan, 21 to 24 November."},
+ {g:"AXION",t:"First Ten Days",u:"https://claude.ai/artifact/NMnH1cZTv2ypczeK7do2fQ"},
+ {g:"AXION",t:"Journey Simulation",u:"https://claude.ai/artifact/4WibWEnGBhsJkTjcKJuxVx"},
+ {g:"AXION",t:"Versions to Learn",u:"https://claude.ai/artifact/36BF5p3kduuaEeRpA8Ga62"},
+ {g:"AXION",t:"Weekly Review",u:"https://claude.ai/artifact/BiqwztWeH8R8Vp6B9tnJ3R"},
+ {g:"AXION",t:"Install Path",u:"https://claude.ai/artifact/XyJjAgbAoEGwV3ahw3rPpM"},
+ {g:"AXION",t:"Audit",u:"https://claude.ai/artifact/GMyio2F4Uif87ioaPWDjyB"},
+ {g:"AXION",t:"Design Pass",u:"https://claude.ai/artifact/EeBENVnMxkDXx1bPd1dhQp"},
+ {g:"AXION",t:"Weekly Review (August)",u:"https://claude.ai/artifact/Qq6iT2M6o1MpiCQ5BnZQhA"},
+ {g:"Other",t:"Push Copy Benchmark",u:"https://claude.ai/artifact/SdpfEUeaKMS87UXTnbtKJc"},
+ {g:"Other",t:"Morning Bell",u:"https://claude.ai/artifact/BVg1CEk97LWDpuLkhLV89X"},
+ {g:"Other",t:"Now vs After Deploy",u:"https://claude.ai/artifact/9zAwNAegDDh8urj9xrAyTv"},
+ {g:"Other",t:"Three Skins for Lift",u:"https://claude.ai/artifact/PGuLaSJDCEnQPpv6HeW9DX"}
+];
+const local=a=>a.u.startsWith("/");
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let sel=0;try{const s=+localStorage.getItem("hub-sel");if(APPS[s])sel=s}catch(e){}
+function nav(){
+  const gs=[...new Set(APPS.map(a=>a.g))];
+  document.getElementById("nav").innerHTML=gs.map(g=>`<div class="group"><h2>${esc(g)}</h2>${APPS.map((a,i)=>a.g!==g?"":`<button class="item" data-i="${i}" aria-current="${i===sel}"><span>${esc(a.t)}</span>${local(a)?"":'<span class="ext">↗</span>'}</button>`).join("")}</div>`).join("");
+}
+function show(i){
+  sel=i;try{localStorage.setItem("hub-sel",i)}catch(e){}
+  const a=APPS[i],v=document.getElementById("view");
+  document.getElementById("cur").textContent=a.t;
+  v.innerHTML=local(a)?`<iframe src="${esc(a.u)}" title="${esc(a.t)}" allow="autoplay"></iframe>`
+    :`<div class="outside"><div><h1>${esc(a.t)}</h1><p>${esc(a.d||"")}${a.d?" ":""}This one lives in Claude, so it opens there.</p><a class="open" href="${esc(a.u)}" target="_blank" rel="noopener">Open in Claude ↗</a></div></div>`;
+  nav();document.body.classList.remove("menu");
+}
+document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest(".item");if(!b)return;const i=+b.dataset.i;if(!local(APPS[i]))window.open(APPS[i].u,"_blank","noopener");show(i)});
+document.getElementById("menu").addEventListener("click",()=>document.body.classList.add("menu"));
+document.getElementById("scrim").addEventListener("click",()=>document.body.classList.remove("menu"));
+show(sel);
 </script>
-</body></html>
+</body>
+</html>
