@@ -95,6 +95,8 @@ tr.rest td { border-bottom: 0; font-weight: 600; padding-top: 9px; }
 .btn { font: 500 0.85rem var(--body); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
 .btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 .btn:disabled { opacity: 0.5; cursor: default; }
+.refresh { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+a.btn { text-decoration: none; display: inline-block; }
 .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 20px 16px; color: var(--muted); margin: 0; }
 </style>
 
@@ -102,6 +104,10 @@ tr.rest td { border-bottom: 0; font-weight: 600; padding-top: 9px; }
   <header>
     <h1>Annonces Montpellier</h1>
     <p class="sub" id="asof">Chargement des annonces…</p>
+    <div class="refresh">
+      <button class="btn" type="button" id="reload">Actualiser</button>
+      <a class="btn" id="search" target="_blank" rel="noopener">Lancer une recherche maintenant ↗</a>
+    </div>
   </header>
 
   <div class="news none" id="news">Les nouvelles annonces de la dernière recherche s'afficheront ici.</div>
@@ -358,12 +364,20 @@ tr.rest td { border-bottom: 0; font-weight: 600; padding-top: 9px; }
 
   var mine = {};
   try { mine = JSON.parse(localStorage.getItem("annonces-status") || "{}") || {}; } catch (err) {}
-  fetch("data.json", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) {
-    var v = d.settings || {}; Object.keys(v).forEach(function (k) { S[k] = v[k]; });
-    listings = (d.listings || []).filter(function (l) { return l.price > 0 && l.surface > 0; })
-      .map(function (l) { if (mine[l.id] && l.status !== "hidden") l.status = mine[l.id]; return l; });
-    ready = true; render();
-  }).catch(function () { $("asof").textContent = "Impossible de charger les annonces. Vérifie la connexion et recharge."; });
+  function load(btn) {
+    if (btn) { btn.disabled = true; btn.textContent = "Actualisation…"; }
+    fetch("data.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) {
+      var v = d.settings || {}; Object.keys(v).forEach(function (k) { S[k] = v[k]; });
+      listings = (d.listings || []).filter(function (l) { return l.price > 0 && l.surface > 0; })
+        .map(function (l) { if (mine[l.id] && l.status !== "hidden") l.status = mine[l.id]; return l; });
+      ready = true; render();
+    }).catch(function () { $("asof").textContent = "Impossible de charger les annonces. Vérifie la connexion et recharge."; })
+      .then(function () { if (btn) { btn.disabled = false; btn.textContent = "Actualiser"; } });
+  }
+  $("reload").addEventListener("click", function () { load($("reload")); });
+  var promptUrl = location.origin + location.pathname.replace(/[^/]*$/, "") + "search-prompt.md";
+  $("search").href = "https://claude.ai/code?prompt_url=" + encodeURIComponent(promptUrl) + "&repositories=" + encodeURIComponent("ghisfit/ghisfit.github.io");
+  load();
 })();
 </script>
 
