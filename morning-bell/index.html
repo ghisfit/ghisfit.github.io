@@ -1,0 +1,1771 @@
+<!doctype html><html><head><meta charset=utf8><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0B0A09"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Morning Bell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#0B0A09;
+  --panel:#161412;
+  --panel-2:#1F1B18;
+  --line:#2E2823;
+  --line-soft:#221E1A;
+  --ink:#F1EDE8;
+  --dim:#948B82;
+  --dimmer:#6A635C;
+
+  --prep:#E0A93B;
+  --work:#E2543A;
+  --rest:#4E9FC4;
+  --done:#84BE6B;
+
+  --phase:var(--work);
+  --next:var(--rest);
+
+  --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --display:"Archivo",var(--sans);
+
+  --r:10px;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{overflow-x:hidden}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--phase);outline-offset:2px;border-radius:4px}
+
+/* ---------- shell ---------- */
+.wrap{max-width:660px;margin:0 auto;padding:18px 18px 132px}
+
+.topbar{display:flex;align-items:center;gap:12px;padding:4px 0 22px}
+.mark{
+  font-family:var(--display);
+  font-variation-settings:"wdth" 118,"wght" 700;
+  font-size:17px;letter-spacing:.06em;text-transform:uppercase;
+  display:flex;align-items:baseline;gap:8px;
+}
+.mark span{color:var(--work)}
+.topbar .spacer{flex:1}
+
+.iconbtn{
+  width:38px;height:38px;border-radius:var(--r);
+  border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--dim);
+  transition:color .15s,border-color .15s,background .15s;
+}
+.iconbtn:hover{color:var(--ink);border-color:var(--dim)}
+.iconbtn[aria-pressed="false"]{color:var(--dimmer)}
+.iconbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- routine chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.chip{
+  padding:7px 13px;border-radius:999px;border:1px solid var(--line);
+  color:var(--dim);font-size:13.5px;font-weight:500;
+  transition:color .15s,border-color .15s,background .15s;
+  white-space:nowrap;
+}
+.chip:hover{color:var(--ink)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--ground);font-weight:600}
+.chip.add{color:var(--dimmer);border-style:dashed}
+
+/* ---------- session head ---------- */
+.sessionhead{display:flex;align-items:flex-end;gap:14px;margin-bottom:14px}
+.namefield{
+  flex:1;min-width:0;
+  font-family:var(--display);
+  font-variation-settings:"wdth" 112,"wght" 700;
+  font-size:clamp(26px,7vw,34px);
+  letter-spacing:-.01em;line-height:1.1;
+  background:none;border:none;padding:0;width:100%;
+  border-bottom:1px solid transparent;
+  transition:border-color .15s;
+}
+.namefield:hover{border-bottom-color:var(--line)}
+.namefield:focus{outline:none;border-bottom-color:var(--phase)}
+.total{
+  font-family:var(--mono);font-size:14px;color:var(--dim);
+  font-variant-numeric:tabular-nums;padding-bottom:5px;white-space:nowrap;
+}
+
+/* ---------- ribbon ---------- */
+.ribbon{display:flex;gap:1.5px;height:13px;margin-bottom:8px;overflow:hidden;border-radius:3px}
+.seg{min-width:2px;border-radius:1px;opacity:.9}
+.seg.prep{background:var(--prep)}
+.seg.work{background:var(--work)}
+.seg.rest{background:var(--rest)}
+.seg.cool{background:var(--done)}
+.legend{
+  display:flex;flex-wrap:wrap;gap:4px 16px;
+  font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dimmer);
+  margin-bottom:26px;
+}
+.legend i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:6px;vertical-align:1px}
+
+/* ---------- blocks ---------- */
+.sectionlabel{
+  font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dimmer);
+  margin:0 0 10px;font-weight:500;
+}
+.stack{display:flex;flex-direction:column;gap:10px;margin-bottom:26px}
+
+.row{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r);
+  padding:13px 14px;display:flex;align-items:center;gap:14px;
+}
+.row .rowlabel{flex:1;font-weight:500}
+.row .rowhint{color:var(--dimmer);font-size:12.5px}
+
+.block{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r);
+  padding:13px 14px 14px;position:relative;
+  border-left:2px solid var(--work);
+}
+.blockhead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.blockname{
+  flex:1;min-width:0;background:none;border:none;padding:2px 0;font-weight:600;font-size:15.5px;
+  border-bottom:1px solid transparent;
+}
+.blockname:hover{border-bottom-color:var(--line)}
+.blockname:focus{outline:none;border-bottom-color:var(--phase)}
+.minibtn{
+  width:26px;height:26px;border-radius:6px;color:var(--dimmer);display:grid;place-items:center;flex:none;
+  transition:color .15s,background .15s;
+}
+.minibtn:hover{color:var(--ink);background:var(--panel-2)}
+.minibtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.minibtn:disabled{opacity:.25;cursor:default}
+.minibtn:disabled:hover{color:var(--dimmer);background:none}
+
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+
+/* ---------- number field ---------- */
+.field{display:flex;flex-direction:column;gap:5px}
+.field > span{
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer);
+  display:flex;justify-content:space-between;align-items:baseline;gap:6px;
+}
+.field > span em{font-style:normal;font-family:var(--mono);letter-spacing:0;text-transform:none;opacity:.8}
+.stepper{
+  display:flex;align-items:stretch;background:var(--panel-2);
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;
+}
+.stepper button{
+  width:32px;flex:none;color:var(--dim);font-size:17px;line-height:1;
+  transition:background .12s,color .12s;
+}
+.stepper button:hover{background:var(--line);color:var(--ink)}
+.stepper button:active{background:var(--phase);color:var(--ground)}
+.stepper input{
+  flex:1;min-width:0;width:100%;text-align:center;background:none;border:none;
+  font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums;
+  padding:9px 0;
+}
+.stepper input:focus{outline:none;background:var(--line-soft)}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.ghostbtn{
+  border:1px dashed var(--line);border-radius:var(--r);padding:12px;
+  color:var(--dim);font-weight:500;width:100%;
+  transition:color .15s,border-color .15s;
+}
+.ghostbtn:hover{color:var(--ink);border-color:var(--dim)}
+
+.footlinks{
+  display:flex;gap:18px;padding-top:22px;border-top:1px solid var(--line-soft);
+  font-size:12.5px;color:var(--dimmer);flex-wrap:wrap;
+}
+.footlinks button{color:var(--dimmer);text-decoration:underline;text-underline-offset:3px}
+.footlinks button:hover{color:var(--ink)}
+.footnote{flex:1;min-width:180px;text-align:right;line-height:1.5}
+
+/* ---------- start bar ---------- */
+.startbar{
+  position:fixed;left:0;right:0;bottom:0;padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,var(--ground) 62%,rgba(11,10,9,0));
+  display:flex;justify-content:center;pointer-events:none;z-index:5;
+}
+.start{
+  pointer-events:auto;width:100%;max-width:624px;
+  background:var(--work);color:#1A0D09;
+  font-family:var(--display);font-variation-settings:"wdth" 116,"wght" 700;
+  font-size:19px;letter-spacing:.1em;text-transform:uppercase;
+  padding:17px;border-radius:var(--r);
+  transition:transform .12s,filter .15s;
+}
+.start:hover{filter:brightness(1.08)}
+.start:active{transform:scale(.985)}
+
+/* ---------- run view ---------- */
+.run{
+  position:fixed;inset:0;z-index:20;
+  background:var(--ground);
+  display:none;flex-direction:column;
+  padding:0 16px calc(16px + env(safe-area-inset-bottom));
+}
+.run.on{display:flex}
+.run::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(115% 72% at 50% 0%,color-mix(in srgb,var(--phase) 17%,transparent),transparent 72%);
+  transition:background .45s ease;
+}
+.run > *{position:relative}
+
+.rail{height:3px;background:var(--line-soft);flex:none;margin:0 -16px}
+
+/* A change you can see across a room, for when the phone cannot make a sound.
+   iOS gives a web page no vibration API either, so light is all that is left. */
+.flashlayer{
+  position:absolute;inset:0;background:var(--phase);
+  opacity:0;pointer-events:none;z-index:6;
+}
+.flashlayer.go{animation:phaseflash .55s ease-out}
+@keyframes phaseflash{
+  0%   {opacity:.92}
+  55%  {opacity:.38}
+  100% {opacity:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .flashlayer.go{animation:none;opacity:0}
+}
+.railfill{height:100%;background:var(--phase);width:0;transition:width .25s linear}
+
+.runtop{display:flex;align-items:center;gap:12px;padding:14px 0 0;flex:none}
+.runtop .roundtag{
+  font-family:var(--mono);font-size:12.5px;color:var(--dim);
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+.runtop .spacer{flex:1}
+
+.clockzone{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;min-height:0;text-align:center;position:relative;
+}
+
+/* last three seconds: the incoming phase colour arrives before the phase does */
+.ghostdigit{
+  position:absolute;left:50%;top:50%;translate:-50% -50%;
+  font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 800;
+  font-size:min(58vw,46vh,420px);line-height:1;
+  color:var(--next);opacity:0;pointer-events:none;z-index:0;
+}
+.ghostdigit.pop{animation:cdpop .96s cubic-bezier(.16,.7,.3,1) forwards}
+@keyframes cdpop{
+  0%   {opacity:0;   scale:.55}
+  22%  {opacity:.4;  scale:.9}
+  100% {opacity:0;   scale:1.7}
+}
+.phaselabel{
+  font-family:var(--display);font-variation-settings:"wdth" 122,"wght" 700;
+  font-size:clamp(15px,4.4vw,20px);letter-spacing:.24em;text-transform:uppercase;
+  color:var(--phase);
+}
+.exercise{
+  font-size:clamp(14px,3.6vw,17px);color:var(--dim);font-weight:500;
+  max-width:92%;text-wrap:balance;
+}
+.clock{
+  font-family:var(--display);font-variation-settings:"wdth" 114,"wght" 700;
+  font-size:min(26.5vw,19vh,168px);line-height:.92;letter-spacing:-.045em;
+  font-variant-numeric:tabular-nums;margin:6px 0 2px;
+  width:100%;position:relative;z-index:1;
+  transition:color .2s ease;
+}
+.run.counting .clock{color:var(--next)}
+.run.counting .steprail{background:color-mix(in srgb,var(--next) 22%,transparent)}
+.run.counting .stepfill{background:var(--next)}
+.steprail{width:min(100%,420px);height:4px;background:var(--line-soft);border-radius:2px;overflow:hidden;margin-top:10px}
+.stepfill{height:100%;background:var(--phase);width:100%}
+.nextup{
+  margin-top:16px;font-size:13px;color:var(--dimmer);
+  letter-spacing:.03em;
+}
+.nextup b{color:var(--dim);font-weight:500}
+
+.controls{display:flex;align-items:center;justify-content:center;gap:14px;flex:none;padding-top:8px}
+.ctl{
+  width:58px;height:58px;border-radius:50%;border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--dim);flex:none;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.ctl:hover{color:var(--ink);border-color:var(--dim)}
+.ctl svg{width:22px;height:22px;fill:currentColor}
+.ctl.primary{
+  width:86px;height:86px;background:var(--phase);border-color:var(--phase);color:var(--ground);
+}
+.ctl.primary svg{width:32px;height:32px}
+.ctl.primary:hover{filter:brightness(1.08);color:var(--ground)}
+
+.endrow{display:flex;justify-content:center;padding-top:14px;flex:none}
+.holdend{
+  position:relative;overflow:hidden;
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);
+  padding:9px 18px;border-radius:999px;border:1px solid var(--line-soft);
+  transition:color .15s;
+}
+.holdend:hover{color:var(--dim)}
+.holdend i{
+  position:absolute;left:0;top:0;bottom:0;width:0;background:var(--line);z-index:-1;
+}
+.holdend.arming i{width:100%;transition:width .75s linear}
+
+/* paused dim */
+.run.paused .clock{opacity:.4}
+.run.paused .phaselabel::after{content:" · paused";opacity:.55}
+
+/* ---------- done ---------- */
+.donecard{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;
+}
+.donecard .big{
+  font-family:var(--display);font-variation-settings:"wdth" 120,"wght" 700;
+  font-size:clamp(40px,13vw,76px);letter-spacing:-.02em;color:var(--done);line-height:1;
+}
+.donecard .sub{color:var(--dim);font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.donebtns{display:flex;gap:10px;margin-top:26px}
+.donebtns button{
+  padding:14px 26px;border-radius:var(--r);border:1px solid var(--line);color:var(--dim);
+  font-weight:500;letter-spacing:.04em;
+}
+.donebtns button.go{background:var(--done);border-color:var(--done);color:#0C1607;font-weight:600}
+
+@media (max-width:420px){
+  .fields{grid-template-columns:repeat(3,1fr);gap:7px}
+  .stepper button{width:27px}
+  .wrap{padding:14px 14px 128px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+  .holdend.arming i{transition-duration:.75s !important}
+  /* keep the 3-2-1 readable without the scale animation */
+  .ghostdigit.pop{opacity:.14;scale:1.15}
+}
+</style>
+
+<div class="wrap" id="setup">
+  <div class="topbar">
+    <div class="mark">Morning<span>Bell</span></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="soundBtn" aria-pressed="true" title="Sound on/off" aria-label="Sound on or off">
+      <svg viewBox="0 0 24 24" id="soundIcon"></svg>
+    </button>
+    <button class="iconbtn" id="voiceBtn" aria-pressed="false" title="Count the last 3 seconds out loud" aria-label="Count the last 3 seconds out loud">
+      <svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 013 3v5a3 3 0 01-6 0V6a3 3 0 013-3z"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/></svg>
+    </button>
+    <button class="iconbtn" id="vibeBtn" aria-pressed="true" title="Vibrate on phase change" aria-label="Vibrate on phase change">
+      <svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 9v6M21 9v6"/></svg>
+    </button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="sessionhead">
+    <input class="namefield" id="routineName" aria-label="Routine name" spellcheck="false">
+    <div class="total" id="totalTime">—</div>
+  </div>
+
+  <div class="ribbon" id="ribbon"></div>
+  <div class="legend">
+    <span><i style="background:var(--prep)"></i>Get ready</span>
+    <span><i style="background:var(--work)"></i>Work</span>
+    <span><i style="background:var(--rest)"></i>Rest</span>
+    <span><i style="background:var(--done)"></i>Cool down</span>
+  </div>
+
+  <p class="sectionlabel">Before you start</p>
+  <div class="stack">
+    <div class="row">
+      <span class="rowlabel">Get ready<br><span class="rowhint">Countdown before the first round</span></span>
+      <div style="width:132px" id="prepMount"></div>
+    </div>
+  </div>
+
+  <p class="sectionlabel">Rounds</p>
+  <div class="stack" id="blocks"></div>
+  <button class="ghostbtn" id="addBlock" style="margin-bottom:26px">+ Add another set of rounds</button>
+
+  <p class="sectionlabel">After the last round</p>
+  <div class="stack">
+    <div class="row">
+      <span class="rowlabel">Cool down<br><span class="rowhint">Set to 0 to finish on the last round</span></span>
+      <div style="width:132px" id="coolMount"></div>
+    </div>
+  </div>
+
+  <div class="footlinks">
+    <button id="dupBtn">Duplicate</button>
+    <button id="delBtn">Delete</button>
+    <button id="testBtn">Test beep</button>
+    <button id="engineBtn">Beeps: with music</button>
+    <button id="levelBtn">Beep: medium</button>
+    <button id="exportBtn">Copy backup</button>
+    <button id="importBtn">Restore</button>
+    <span class="footnote" id="audioStatus">Saved on this device. Works offline.</span>
+  </div>
+</div>
+
+<div class="startbar">
+  <button class="start" id="startBtn" type="button">Start</button>
+</div>
+
+<div class="run" id="run" role="dialog" aria-label="Timer running">
+  <div class="flashlayer" id="flash" aria-hidden="true"></div>
+  <div class="rail"><div class="railfill" id="railFill"></div></div>
+
+  <div class="runtop">
+    <span class="roundtag" id="roundTag"></span>
+    <span class="roundtag" id="voiceTag" style="opacity:.7;margin-left:10px"></span>
+    <span class="spacer"></span>
+    <span class="roundtag" id="leftTag"></span>
+  </div>
+
+  <div class="clockzone" id="clockZone">
+    <div class="ghostdigit" id="ghost" aria-hidden="true"></div>
+    <div class="phaselabel" id="phaseLabel">Work</div>
+    <div class="exercise" id="exerciseLabel"></div>
+    <div class="clock" id="clock">00:00</div>
+    <div class="steprail"><div class="stepfill" id="stepFill"></div></div>
+    <div class="nextup" id="nextUp"></div>
+  </div>
+
+  <div class="donecard" id="doneCard" hidden>
+    <div class="big">Done</div>
+    <div class="sub" id="doneSub"></div>
+    <div class="donebtns">
+      <button class="go" id="againBtn">Run it again</button>
+      <button id="closeBtn">Back to setup</button>
+    </div>
+  </div>
+
+  <div class="controls" id="controls">
+    <button class="ctl" id="prevBtn" aria-label="Previous step"><svg viewBox="0 0 24 24"><path d="M7 5h2.5v14H7zM19 5v14l-9-7z"/></svg></button>
+    <button class="ctl primary" id="playBtn" aria-label="Pause"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+    <button class="ctl" id="skipBtn" aria-label="Next step"><svg viewBox="0 0 24 24"><path d="M14.5 5H17v14h-2.5zM5 5v14l9-7z"/></svg></button>
+  </div>
+
+  <div class="endrow" id="endRow">
+    <button class="holdend" id="endBtn"><i></i>Hold to end</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* Claim the audio session FIRST — before any AudioContext or <audio> exists.
+   WebKit fixes the page's category when the first audio object is created, so
+   asking afterwards does nothing, which is why every earlier attempt read back
+   as "auto". "transient" is the category a beep wants: audible regardless of
+   Silent Mode, and it ducks other audio for its length instead of seizing the
+   session, so music carries on. Native timer apps do exactly this through
+   AVAudioSession; this is the same knob exposed to the web. */
+function claimAudioSession(){
+  try {
+    if(navigator.audioSession && navigator.audioSession.type !== "transient")
+      navigator.audioSession.type = "transient";
+  } catch(e){}
+}
+claimAudioSession();
+
+/* ============================ data ============================ */
+
+var KEY = "morningbell.v1";
+var uid = function(){ return Math.random().toString(36).slice(2,9); };
+
+function defaultState(){
+  return {
+    activeId: "seed",
+    sound: true,
+    vibrate: true,
+    voice: true,
+    engine: "media",
+    beepLevel: 2,
+    routines: [{
+      id: "seed",
+      name: "Morning",
+      prepare: 5,
+      cooldown: 0,
+      blocks: [
+        { id: uid(), name: "Mobility", work: 30, rest: 5, rounds: 50 }
+      ]
+    }]
+  };
+}
+
+var state;
+try {
+  var raw = localStorage.getItem(KEY);
+  state = raw ? JSON.parse(raw) : defaultState();
+} catch(e){ state = defaultState(); }
+if(!state || !state.routines || !state.routines.length) state = defaultState();
+// settings added after a save already existed on this device
+if(typeof state.voice !== "boolean") state.voice = true;
+if(!(state.beepLevel >= 1 && state.beepLevel <= 3)) state.beepLevel = 2;
+if(state.engine !== "tone" && state.engine !== "media") state.engine = "tone";
+
+/* One-time correction. "media" was a default I picked while chasing a silent
+   phone, and it turned out to stop Spotify — not a choice anyone made, so it
+   gets overridden once rather than left for the user to undo by hand. The
+   morning numbers were asked for directly; a routine the user has since added
+   to is left alone. */
+if(state.rev !== 3){
+  if(!state.rev && state.routines.length === 1){
+    var seed = defaultState().routines[0];
+    seed.id = state.routines[0].id;
+    state.routines = [seed];
+    state.activeId = seed.id;
+  }
+  // Web Audio is the one path iOS silences under Silent Mode, but it is also the
+  // only one that leaves music playing, and Safari refuses to move it. So the
+  // beeps stay here and the spoken cue carries the signal — speech is audible
+  // under Silent Mode and ducks music, which is the behaviour we could not buy
+  // any other way.
+  state.engine = "tone";
+  state.rev = 3;
+  save();
+}
+
+/* The count is wanted alongside the beep, explicitly. If the toggle was off —
+   by a stray tap or an older default — that is not a choice worth preserving. */
+if(state.rev !== 4){
+  state.voice = true;
+  state.rev = 4;
+  save();
+}
+
+/* Same for the speaker toggle. A run with it off is completely silent while the
+   Test beep still sounds — that button forces sound on, by design, because it
+   is a hardware test. Those two facts together look exactly like "the timer is
+   broken", and cost most of a debugging session. */
+if(state.rev !== 5){
+  state.sound = true;
+  state.rev = 5;
+  save();
+}
+/* Moved out of Claude onto its own website (Oct 2026). Outside the Claude viewer
+   the clip engine is allowed, and it is the one iOS keeps audible in Silent Mode,
+   so it becomes the default here. "Beeps: with music" still switches back. */
+if(state.rev !== 6){
+  state.engine = "media";
+  state.rev = 6;
+  save();
+}
+if(typeof state.sound !== "boolean") state.sound = true;
+if(typeof state.vibrate !== "boolean") state.vibrate = true;
+
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+}
+function routine(){
+  var r = null, i;
+  for(i=0;i<state.routines.length;i++) if(state.routines[i].id === state.activeId) r = state.routines[i];
+  if(!r){ r = state.routines[0]; state.activeId = r.id; }
+  return r;
+}
+
+/* ============================ compile ============================ */
+/* A routine compiles down to a flat list of steps. Everything downstream
+   (ribbon, clock, skip, beeps) reads only this list. */
+
+function compile(r){
+  var steps = [], bi, round, b;
+  if(r.prepare > 0) steps.push({ kind:"prep", label:"Get ready", name:"", dur:r.prepare });
+
+  for(bi=0; bi<r.blocks.length; bi++){
+    b = r.blocks[bi];
+    for(round=1; round<=b.rounds; round++){
+      steps.push({ kind:"work", label:"Work", name:b.name, dur:b.work, round:round, of:b.rounds, block:bi });
+      var lastOfAll = (bi === r.blocks.length - 1) && (round === b.rounds);
+      if(b.rest > 0 && !lastOfAll)
+        steps.push({ kind:"rest", label:"Rest", name:b.name, dur:b.rest, round:round, of:b.rounds, block:bi });
+    }
+  }
+  if(r.cooldown > 0) steps.push({ kind:"cool", label:"Cool down", name:"", dur:r.cooldown });
+  return steps.filter(function(s){ return s.dur > 0; });
+}
+
+function totalOf(steps){
+  return steps.reduce(function(a,s){ return a + s.dur; }, 0);
+}
+function mmss(sec){
+  sec = Math.max(0, Math.ceil(sec));
+  var m = Math.floor(sec/60), s = sec%60;
+  return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+}
+function human(sec){
+  sec = Math.round(sec);
+  var m = Math.floor(sec/60), s = sec%60;
+  if(m && s) return m+" min "+s+" s";
+  if(m) return m+" min";
+  return s+" s";
+}
+
+/* ============================ audio ============================ */
+/* Web Audio only: no files to load, so it works offline and starts instantly.
+   Beeps for a step are scheduled the moment the step begins, which keeps them
+   on time even if the browser throttles timers with the screen off. */
+
+var AC = window.AudioContext || window.webkitAudioContext;
+var ctx = null, master = null, scheduled = [], toneTag = null;
+
+/* On iOS, Web Audio defaults to the "ambient" audio session, which the physical
+   silent switch mutes — the context still reports "running" while nothing comes
+   out. Asking for the playback session routes it like a music app instead, so
+   the beeps survive the switch. iOS 16.4+; a no-op everywhere else. */
+/* "transient" is the one that lets music keep playing: iOS ducks Spotify for the
+   length of a beep and hands it straight back, instead of taking the session
+   over. "playback" is the solo behaviour — louder, but it stops the music. */
+/* Re-assert on every tap. The session can be reset by the system, and the voice
+   count — which is audible and ducks the music correctly — proves this category
+   is what we want the beeps in too. */
+function setPlaybackSession(){
+  claimAudioSession();
+}
+
+function ensureAudio(){
+  if(!AC) return null;
+  setPlaybackSession();
+  if(!ctx){
+    try { ctx = new AC(); } catch(e){ return null; }
+    master = ctx.createGain();
+    master.gain.value = 0.95;
+    master.connect(ctx.destination);
+    // near-silent tone keeps the context awake on mobile between beeps
+    var keep = ctx.createOscillator(), kg = ctx.createGain();
+    kg.gain.value = 0.0001; keep.frequency.value = 40;
+    keep.connect(kg); kg.connect(ctx.destination); keep.start();
+  }
+  if(ctx.state === "suspended") ctx.resume();
+  return ctx;
+}
+
+/* iOS will not let a page make a sound until one has been started from inside a
+   real tap. Playing a one-frame silent buffer during the tap is what opens the
+   gate; everything scheduled afterwards is then allowed through. */
+function unlockAudio(){
+  ensureAudio();
+  setPlaybackSession();     // some iOS builds only honour this after the context exists
+  if(!ctx) return;
+  try {
+    var src = ctx.createBufferSource();
+    src.buffer = ctx.createBuffer(1, 1, 22050);
+    src.connect(ctx.destination);
+    src.start(0);
+  } catch(e){}
+  try { if(ctx.state === "suspended") ctx.resume(); } catch(e){}
+}
+
+function tone(at, freq, dur, peak, type){
+  if(!ctx || !state.sound) return;
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type || "sine";
+  o.frequency.setValueAtTime(freq, at);
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.exponentialRampToValueAtTime(peak, at + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  o.connect(g); g.connect(master);
+  o.start(at); o.stop(at + dur + 0.05);
+  scheduled.push({ node:o, at:at, tag:toneTag });
+}
+
+/* The change beep, oscillator version — the same shape the WAV clips got:
+   a square wave held flat for its whole length instead of a sine that decays
+   away. Loudness follows the energy under the envelope, not the peak, so a
+   decaying tone reads as tiny next to a spoken word at full volume. This path
+   was left behind when the clips were made loud; that is why the beeps went
+   quiet the moment the engine switched. Keep the two in step. */
+function holdTone(at, freq, dur, peak){
+  if(!ctx || !state.sound) return;
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = "triangle";
+  o.frequency.setValueAtTime(freq, at);
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.exponentialRampToValueAtTime(peak * beepLevel(), at + 0.006);   // attack
+  g.gain.setValueAtTime(peak * beepLevel(), at + Math.max(0.02, dur - 0.04));
+  g.gain.exponentialRampToValueAtTime(0.0001, at + dur);   // release
+  o.connect(g); g.connect(master);
+  o.start(at); o.stop(at + dur + 0.05);
+  scheduled.push({ node:o, at:at, tag:toneTag });
+}
+
+/* Cancel what has not sounded yet. Two things must survive:
+   a tone already ringing, and the tone that marks a step change.
+
+   The change tone is the subtle one. Steps end on the system clock but tones
+   are scheduled on the audio clock, and the two drift — so at the boundary the
+   change tone can still read as "in the future" and get cancelled a breath
+   before it sounds. That is what silenced every change beep. On a natural
+   advance we keep it whatever the clocks say; only a manual skip clears it. */
+function clearScheduled(keepTag){
+  clearMediaTimers(keepTag);
+  var t = ctx ? ctx.currentTime : 0, keep = [], i, s;
+  for(i=0;i<scheduled.length;i++){
+    s = scheduled[i];
+    if(s.at + 2 < t) continue;                        // long finished, forget it
+    if(keepTag && s.tag === keepTag){ keep.push(s); continue; }
+    if(s.at <= t + 0.15){ keep.push(s); continue; }   // already ringing
+    try { s.node.stop(0); } catch(e){}
+  }
+  scheduled = keep;
+}
+
+var VOICES = {
+  // The 3·2·1 ticks rise in pitch so the count is audible without a word being
+  // spoken — iOS home-screen apps fail speech silently, and the number matters
+  // more than the voice carrying it.
+  tick3: function(at){ tone(at, 660, 0.11, 0.50 * beepLevel()); tone(at, 1320, 0.07, 0.13 * beepLevel()); },
+  tick2: function(at){ tone(at, 800, 0.11, 0.52 * beepLevel()); tone(at, 1600, 0.07, 0.13 * beepLevel()); },
+  tick1: function(at){ tone(at, 950, 0.13, 0.55 * beepLevel()); tone(at, 1900, 0.08, 0.14 * beepLevel()); },
+  tick:  function(at){ tone(at, 880, 0.11, 0.55 * beepLevel()); tone(at, 1760, 0.08, 0.16 * beepLevel()); },
+
+  // the zero beeps, held flat so they carry — mirrors SPECS above
+  work: function(at){ holdTone(at, 988, 0.50, 0.42); },
+  rest: function(at){ holdTone(at, 587, 0.50, 0.42); },
+  prep: function(at){ holdTone(at, 440, 0.38, 0.38); },
+  cool: function(at){ holdTone(at, 698, 0.45, 0.38); },
+  done: function(at){ holdTone(at, 523, 0.24, 0.42);
+                      holdTone(at+0.24, 659, 0.24, 0.42);
+                      holdTone(at+0.48, 784, 0.65, 0.46); }
+};
+
+/* ---------- second engine: the beeps as real audio files ----------
+
+   iOS mutes Web Audio under Silent Mode and gives a page no reliable way to opt
+   out — navigator.audioSession reports back "auto" whatever you set. An <audio>
+   element is a different path entirely: it plays as media, the way a podcast
+   does, so Silent Mode leaves it alone. The tones are synthesised into WAVs here
+   at runtime, so there are still no files to download and it works offline. */
+
+/* Each sound carries a quiet octave above the fundamental. That upper partial is
+   what makes a beep cut through a voice — raising the level alone just makes a
+   soft tone louder, and it still gets buried. Levels sit near full scale; the
+   sum is clamped when the WAV is written. */
+/* Beep loudness, set by the user and saved. 1 = soft, 2 = medium, 3 = loud.
+   Applied to the tone peaks and to clip volume, never to speech — the spoken
+   cue is the signal and stays at full. */
+var LEVELS = [0.35, 0.62, 1];
+function beepLevel(){ return LEVELS[(state.beepLevel || 2) - 1]; }
+var LEVEL_NAMES = ["soft", "medium", "loud"];
+
+var SPECS = {
+  // The 3-2-1 ticks stay short and decaying — they are already right.
+  tick:  [{ hz:880,  t:0, d:0.12, g:0.72 }, { hz:1760, t:0, d:0.09, g:0.20 }],
+  tick3: [{ hz:660,  t:0, d:0.12, g:0.72 }, { hz:1320, t:0, d:0.09, g:0.18 }],
+  tick2: [{ hz:800,  t:0, d:0.12, g:0.72 }, { hz:1600, t:0, d:0.09, g:0.18 }],
+  tick1: [{ hz:950,  t:0, d:0.14, g:0.75 }, { hz:1900, t:0, d:0.09, g:0.18 }],
+
+  // The zero beeps are the ones that have to carry a room. hold:true keeps the
+  // envelope flat instead of decaying, which is where the loudness comes from.
+  // One sustained tone each; work sits above rest so the two stay tellable apart
+  // without looking at the screen.
+  work: [{ hz:988,  t:0,    d:0.58, g:0.9, hold:true }],
+  rest: [{ hz:587,  t:0,    d:0.58, g:0.9, hold:true }],
+  prep: [{ hz:440,  t:0,    d:0.42, g:0.9, hold:true }],
+  cool: [{ hz:698,  t:0,    d:0.52, g:0.9, hold:true }],
+  done: [{ hz:523,  t:0,    d:0.26, g:0.9, hold:true },
+         { hz:659,  t:0.24, d:0.26, g:0.9, hold:true },
+         { hz:784,  t:0.48, d:0.75, g:0.9, hold:true }],
+
+  // long and steady on purpose: hold volume-up while this plays to set the media
+  // level, which iOS will not let you change while nothing is playing
+  level: [{ hz:880,  t:0,    d:2.60, g:0.9, hold:true }]
+};
+
+var MEDIA = null, mediaTimers = [];
+
+function wavUri(parts){
+  var sr = 22050, span = 0, i, j, p;
+  for(i=0;i<parts.length;i++) span = Math.max(span, parts[i].t + parts[i].d);
+  var n = Math.ceil(span * sr) + 32, pcm = new Float32Array(n);
+
+  for(i=0;i<parts.length;i++){
+    p = parts[i];
+    var from = Math.floor(p.t * sr), len = Math.floor(p.d * sr);
+    var atk = 0.004, rel = 0.035;
+    for(j=0;j<len;j++){
+      var s = j / sr, env, w, ph = 2 * Math.PI * p.hz * s;
+
+      if(p.hold){
+        // Flat envelope, odd harmonics. Loudness follows the energy under the
+        // envelope, not the peak — a spike that dies in 30ms reads as tiny next
+        // to a voice even at full scale, which is what a decaying beep is.
+        if(s < atk)            env = s / atk;
+        else if(s > p.d - rel) env = Math.max(0, (p.d - s) / rel);
+        else                   env = 1;
+        w = 0.62 * Math.sin(ph) + 0.24 * Math.sin(3 * ph) + 0.12 * Math.sin(5 * ph);
+      } else {
+        env = Math.min(1, j / (atk * sr)) * Math.exp(-s * (4 / p.d));
+        w = Math.sin(ph);
+      }
+
+      pcm[from + j] += w * p.g * env;
+    }
+  }
+
+  // lift every clip to just under full scale, so the short tick is as present as
+  // the long tones instead of sitting a few dB below them
+  var peak = 0;
+  for(i=0;i<n;i++){ var a = pcm[i] < 0 ? -pcm[i] : pcm[i]; if(a > peak) peak = a; }
+  if(peak > 0){
+    var lift = 0.95 / peak;
+    for(i=0;i<n;i++) pcm[i] *= lift;
+  }
+
+  var buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf), o = 0;
+  function tag(x){ for(var k=0;k<x.length;k++) v.setUint8(o++, x.charCodeAt(k)); }
+  tag("RIFF"); v.setUint32(o, 36 + n*2, true); o+=4; tag("WAVE");
+  tag("fmt "); v.setUint32(o, 16, true); o+=4;
+  v.setUint16(o, 1, true); o+=2; v.setUint16(o, 1, true); o+=2;
+  v.setUint32(o, sr, true); o+=4; v.setUint32(o, sr*2, true); o+=4;
+  v.setUint16(o, 2, true); o+=2; v.setUint16(o, 16, true); o+=2;
+  tag("data"); v.setUint32(o, n*2, true); o+=4;
+  for(i=0;i<n;i++){
+    var x = pcm[i] < -1 ? -1 : (pcm[i] > 1 ? 1 : pcm[i]);
+    v.setInt16(o, x * 32767, true); o += 2;
+  }
+
+  /* A blob URL, not a data: URI. Strict hosts commonly allow "media-src blob:"
+     while refusing data: outright — Axion does exactly that, and every clip was
+     being blocked there. Blob also skips the base64 pass, which is the slow
+     part of building these on a phone. */
+  try {
+    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  } catch(e){}
+  var bytes = new Uint8Array(buf), bin = "", CH = 0x8000;
+  for(i=0;i<bytes.length;i+=CH)
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+  return "data:audio/wav;base64," + btoa(bin);
+}
+
+function buildMedia(){
+  if(MEDIA) return MEDIA;
+  MEDIA = {};
+  for(var k in SPECS){
+    if(!SPECS.hasOwnProperty(k)) continue;
+    var el = new Audio(wavUri(SPECS[k]));
+    el.preload = "auto";
+    try { el.setAttribute("playsinline", ""); } catch(e){}
+    MEDIA[k] = el;
+  }
+  return MEDIA;
+}
+
+/* iOS only trusts media that a tap started, so every clip gets played silently
+   once during the tap that opens a session. */
+function unlockMedia(force){
+  // Building seven WAVs costs real time on a phone, and on a host with a strict
+  // media-src they cannot play anyway. Only do it if the clip engine is in use.
+  if(!force && state.engine !== "media") return;
+  setPlaybackSession();
+  var m = buildMedia(), k, el, pr;
+  for(k in m){
+    if(!m.hasOwnProperty(k)) continue;
+    el = m[k];
+    try {
+      // muted, and stopped in the same breath — inaudible, but it counts as the
+      // tap-initiated playback iOS wants to see. Done synchronously: waiting on
+      // the promise would leave the clip silenced if a beep landed meanwhile.
+      el.muted = true;
+      pr = el.play();
+      if(pr && pr.then) pr.then(function(){}, function(){});
+      el.pause();
+      try { el.currentTime = 0; } catch(e){}
+      el.muted = false;
+    } catch(e){}
+  }
+}
+
+function playMedia(kind){
+  setPlaybackSession();       // must be in force before the clip starts
+  var el = buildMedia()[kind];
+  if(!el) return;
+  try { el.volume = beepLevel(); } catch(e){}
+  try { el.currentTime = 0; } catch(e){}
+  var pr = el.play();
+  if(pr && pr.catch) pr.catch(function(){});
+}
+
+/* One way in for every sound, whichever engine is selected.
+   lead is seconds from now; tag marks a tone that a step change must not cancel. */
+function emit(kind, lead, tag){
+  if(!state.sound) return;
+
+  if(state.engine === "media"){
+    if(lead <= 0.03){ playMedia(kind); return; }
+    var id = setTimeout(function(){ playMedia(kind); }, lead * 1000);
+    mediaTimers.push({ id:id, tag:tag });
+    return;
+  }
+
+  ensureAudio();
+  if(!ctx) return;
+  var voice = VOICES[kind];
+  if(!voice) return;
+  toneTag = tag || null;
+  voice(ctx.currentTime + Math.max(0, lead));
+  toneTag = null;
+}
+
+function clearMediaTimers(keepTag){
+  var keep = [], i;
+  for(i=0;i<mediaTimers.length;i++){
+    if(keepTag && mediaTimers[i].tag === keepTag){ keep.push(mediaTimers[i]); continue; }
+    clearTimeout(mediaTimers[i].id);
+  }
+  mediaTimers = keep;
+}
+
+/* The cue list for one step, written as "seconds still on the clock when this
+   should sound". Steps end on the system clock, so cues are converted to audio
+   time only in the last fraction of a second before they play — schedule a
+   60-second cooldown up front instead and the two clocks drift apart, which is
+   how the closing chord ends up sounding well after the screen says Done. */
+
+var LOOKAHEAD = 0.35;
+
+function buildCues(dur, nextKind){
+  var cues = [], i;
+  for(i=3;i>=1;i--){
+    if(dur >= i + 0.05) cues.push({ at:i, kind:"tick", tag:null, fired:false });
+  }
+  /* The word that marks the change is SPOKEN a little before zero. Speech takes
+     a few hundred ms to start, so saying it exactly on the boundary lands it
+     after the round has begun. The tone still fires precisely at zero. */
+  if(dur >= 1.2) cues.push({ at:0.35, kind: nextKind || "done", tag:"word", say:true, fired:false });
+  return cues;   // the change cue is NOT here — see enterStep
+}
+
+/* Every cue for a step is scheduled the moment the step begins, on the same
+   system clock the step itself ends on.
+
+   The earlier version watched the clock each frame and fired a cue when it saw
+   the right second. That only works while frames are frequent: throttled to
+   ~1.5s apart (screen dimming, phone pocketed) the poll can land on 3.9 then
+   2.4 then 0.9, which reads as 3, 3, 1 — "2" is never observed, so it is never
+   spoken. Scheduling instead means each cue fires exactly once, late at worst.
+
+   The 80ms lead matters: a cue at zero would otherwise race the step change,
+   and enterStep clears these timers — the same boundary trap as the beeps. */
+var cueTimers = [], CUE_LEAD_MS = 80;
+
+function clearCueTimers(){
+  for(var i=0;i<cueTimers.length;i++) clearTimeout(cueTimers[i]);
+  cueTimers = [];
+}
+
+function scheduleStepCues(secondsLeft){
+  clearCueTimers();
+  if(!run.cues) return;
+  for(var i=0;i<run.cues.length;i++){
+    (function(c){
+      var delay = (secondsLeft - c.at) * 1000 - CUE_LEAD_MS;
+      if(delay < -400) return;                 // that moment is already behind us
+      cueTimers.push(setTimeout(function(){
+        if(!run.active || run.paused) return;
+        if(c.say){ sayCue(c.kind, 0); return; }  // word only; its tone fires at zero
+        if(remaining() < c.at - 1) return;       // so late it would name the wrong second
+        emit("tick" + c.at, 0, null);
+        speak(c.at);
+      }, Math.max(0, delay)));
+    })(run.cues[i]);
+  }
+}
+
+function fireCues(left){
+  if(!state.sound || !run.cues) return;
+  // A suspended context freezes currentTime, and everything queued against it
+  // slides by the length of the freeze. Wake it — but still queue the cue, since
+  // a tone scheduled on a sleeping context plays as soon as it wakes. Dropping
+  // the cue here loses the beep outright.
+  if(ctx && ctx.state === "suspended"){ try { ctx.resume(); } catch(e){} }
+  var i, c, lead;
+  for(i=0;i<run.cues.length;i++){
+    c = run.cues[i];
+    if(c.fired) continue;
+    lead = left - c.at;
+    if(lead > LOOKAHEAD) continue;
+    c.fired = true;
+    emit(c.kind, Math.max(0, lead), c.tag);   // a late cue sounds at once
+    if(c.tag === "change") sayCue(c.kind, Math.max(0, lead));
+  }
+}
+
+function buzz(ms){
+  if(!state.vibrate) return;
+  if(navigator.vibrate) { try { navigator.vibrate(ms); } catch(e){} }
+}
+
+/* ============================ spoken count ============================ */
+/* Optional: says "three, two, one" over the beeps. Driven from the clock loop
+   rather than pre-scheduled, so it is a nicety, not the thing you rely on. */
+
+var synth = window.speechSynthesis || null, voiceTimer = null;
+// our own depth count: synth.pending is a boolean and cannot tell one waiting
+// utterance from five. One in flight plus one queued is fine; deeper is a lie.
+var speechQueued = 0, lastSpokeAt = 0;
+
+/* The beep is the signal; the number only confirms it. So the count comes in a
+   breath later and a little quieter, instead of landing on the same instant and
+   swallowing the beep. */
+function speak(n){
+  if(!state.voice || !synth) return;
+  /* Gate on elapsed time, not on the engine reporting itself idle. Its "end"
+     event fires late and unreliably, so a queue counter stays stuck high and
+     drops every other count — which is how "2" went missing. Counts are a
+     second apart, so 700ms since the last utterance means this one has room. */
+  var now = Date.now();
+  if(now - lastSpokeAt < 700) return;
+  lastSpokeAt = now;
+  sayNow(n, 0.8);
+}
+
+/* The words that mark a change. On iOS these carry the timer when Silent Mode
+   has muted every tone the page can make — speech is the one channel that stays
+   audible and still ducks music instead of stopping it. */
+var WORDS = { work:"Go", rest:"Rest", prep:"Get ready", cool:"Cool down", done:"Finished" };
+
+/* iOS loads its voice list asynchronously and will speak nothing at all — no
+   error, no event — if the utterance names a language it has not got a voice
+   for. Naming a real voice off the device is far more reliable than asking for
+   "en-US" and hoping. The list is empty on first call, so refresh it when the
+   browser says it is ready. */
+var chosenVoice = null;
+
+function pickVoice(){
+  if(chosenVoice || !synth) return chosenVoice;
+  var list = [];
+  try { list = synth.getVoices() || []; } catch(e){ return null; }
+  // only ever hand back something the browser will actually accept
+  var ok = function(x){
+    return x && (typeof SpeechSynthesisVoice === "undefined" || x instanceof SpeechSynthesisVoice);
+  };
+  list = list.filter(ok);
+  var i;
+  for(i=0;i<list.length;i++) if(/^en[-_]?US/i.test(list[i].lang)) { chosenVoice = list[i]; return chosenVoice; }
+  for(i=0;i<list.length;i++) if(/^en/i.test(list[i].lang))        { chosenVoice = list[i]; return chosenVoice; }
+  chosenVoice = list[0] || null;
+  return chosenVoice;
+}
+
+if(synth){
+  pickVoice();
+  try { synth.addEventListener("voiceschanged", function(){ chosenVoice = null; pickVoice(); }); } catch(e){}
+}
+
+function sayCue(kind, lead){
+  if(!state.voice || !synth) return;
+  var w = WORDS[kind];
+  if(!w) return;
+  if(lead <= 0.02){ sayNow(w, 1, true); return; }
+  var id = setTimeout(function(){ sayNow(w, 1, true); }, lead * 1000);
+  mediaTimers.push({ id:id, tag:"change" });
+}
+
+/* No cancel() before speak(). Cancelling and immediately speaking is a WebKit
+   race that drops the new utterance outright — over fifty rounds that is the
+   other half of a missing "2" or a missing "Go". Cues are a second apart and a
+   word takes ~400ms, so the queue never backs up and there is nothing to clear.
+   Cancelling stays where it belongs: pause, skip, and ending a session.
+
+   `must` marks the words that carry the timer. Safari's speech queue does wedge
+   over a long session, so if one never starts it gets a single retry. */
+function sayNow(n, vol, must, isRetry){
+  if(!state.voice || !synth) return;
+
+  var u;
+  try { u = new SpeechSynthesisUtterance(String(n)); } catch(e){ return; }
+
+  /* Every step below is optional and wrapped on its own. A single try around
+     the whole function meant one rejected property — a voice object the browser
+     would not take, say — threw before speak() and killed the utterance with no
+     error and no sound. Nothing here may be allowed to take speak() down. */
+  // Deliberately NOT setting u.voice. Naming a voice iOS has not downloaded
+  // makes it speak nothing at all, silently. The default voice always works.
+  try { u.lang = "en-US"; } catch(e){}
+  // brisk on purpose: a shorter utterance clears the queue sooner for the word
+  // behind it, and these are single syllables, not prose
+  try { u.rate = 1.45; u.pitch = 1; } catch(e){}
+  try { u.volume = typeof vol === "number" ? vol : 0.75; } catch(e){}
+
+  // Safari parks the queue when the page is backgrounded and never restarts it
+  try { if(synth.paused) synth.resume(); } catch(e){}
+
+  /* Report what iOS does with the utterance, but only when it goes wrong.
+     Speech failing here is silent by design — no throw, no error event in most
+     cases — so without this there is nothing to tell "the phone refused" apart
+     from "the app never asked". When it works the tag stays empty. */
+  var started = false, settled = false;
+  var settle = function(){ if(!settled){ settled = true; speechQueued = Math.max(0, speechQueued - 1); } };
+  try {
+    u.onstart = function(){ started = true; markVoice(""); };   // silence is success
+    u.onend   = settle;
+    u.onerror = function(ev){ settle(); markVoice("voice error: " + ((ev && ev.error) || "?")); };
+  } catch(e){}
+
+  /* NO retry, and above all no cancel(). iOS speech can take seconds to start
+     the first time — its engine is cold. A watchdog that gave up at 900ms and
+     called cancel() did not just drop that word: cancel() wipes the WHOLE
+     queue, taking the counts waiting behind it. On a slow phone that meant
+     nothing ever spoke, while the one path without the watchdog (the test
+     button) worked after a long pause. Be patient instead; late speech is
+     fine, and a cancel is never recoverable. */
+  try {
+    setTimeout(function(){ if(!started) markVoice("voice slow"); }, 2500);
+  } catch(e){}
+
+  lastSpokeAt = Date.now();
+  try { speechQueued++; synth.speak(u); } catch(e){ settle(); markVoice("voice threw"); }
+}
+function flashScreen(){
+  var el = document.getElementById("flash");
+  if(!el) return;
+  el.classList.remove("go");
+  void el.offsetWidth;            // restart the animation
+  el.classList.add("go");
+}
+
+function markVoice(s){
+  var el = document.getElementById("voiceTag");
+  if(el) el.textContent = s;
+}
+
+function hushVoice(){
+  if(voiceTimer){ clearTimeout(voiceTimer); voiceTimer = null; }
+  speechQueued = 0;                // cancel() fires no end events; reset by hand
+  if(synth){ try { synth.cancel(); } catch(e){} }
+}
+
+
+function primeVoice(){
+  // iOS only allows speech that descends from a tap, so warm it up on Start
+  if(!state.voice || !synth) return;
+  try {
+    var u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
+    synth.speak(u);
+  } catch(e){}
+}
+
+/* ============================ wake lock ============================ */
+
+var lock = null;
+function keepScreenOn(on){
+  if(!("wakeLock" in navigator)) return;
+  if(on){
+    navigator.wakeLock.request("screen").then(function(l){
+      lock = l;
+      l.addEventListener("release", function(){ lock = null; });
+    }).catch(function(){});
+  } else if(lock){
+    try { lock.release(); } catch(e){}
+    lock = null;
+  }
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "visible" && run.active && !run.paused){
+    keepScreenOn(true);
+    ensureAudio();          // the context is usually suspended on the way back
+  }
+});
+
+/* ============================ number field ============================ */
+
+function numberField(opts){
+  // opts: {label, value, min, max, step, suffix, onChange, showMinutes}
+  var wrap = document.createElement("label");
+  wrap.className = "field";
+
+  var head = document.createElement("span");
+  var title = document.createElement("b");
+  title.style.fontWeight = "500";
+  title.textContent = opts.label;
+  var aside = document.createElement("em");
+  head.appendChild(title); head.appendChild(aside);
+
+  var box = document.createElement("div");
+  box.className = "stepper";
+
+  var minus = document.createElement("button");
+  minus.type = "button"; minus.textContent = "−";
+  minus.setAttribute("aria-label", "Decrease " + opts.label);
+
+  var input = document.createElement("input");
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.setAttribute("aria-label", opts.label);
+
+  var plus = document.createElement("button");
+  plus.type = "button"; plus.textContent = "+";
+  plus.setAttribute("aria-label", "Increase " + opts.label);
+
+  var value = opts.value;
+
+  function clamp(v){
+    if(isNaN(v)) v = opts.min;
+    return Math.max(opts.min, Math.min(opts.max, Math.round(v)));
+  }
+  function paint(){
+    input.value = String(value);
+    aside.textContent = opts.showMinutes && value >= 60 ? mmss(value) : (opts.suffix || "");
+  }
+  function set(v, quiet){
+    value = clamp(v);
+    paint();
+    if(!quiet) opts.onChange(value);
+  }
+
+  minus.addEventListener("click", function(){ set(value - opts.step); });
+  plus.addEventListener("click", function(){ set(value + opts.step); });
+  input.addEventListener("input", function(){
+    var v = parseInt(input.value.replace(/[^0-9]/g, ""), 10);
+    if(input.value === "") return;
+    value = clamp(v); aside.textContent = opts.showMinutes && value >= 60 ? mmss(value) : (opts.suffix || "");
+    opts.onChange(value);
+  });
+  input.addEventListener("blur", function(){ set(parseInt(input.value, 10)); });
+  input.addEventListener("keydown", function(e){
+    if(e.key === "ArrowUp"){ e.preventDefault(); set(value + opts.step); }
+    if(e.key === "ArrowDown"){ e.preventDefault(); set(value - opts.step); }
+    if(e.key === "Enter") input.blur();
+  });
+
+  box.appendChild(minus); box.appendChild(input); box.appendChild(plus);
+  wrap.appendChild(head); wrap.appendChild(box);
+  paint();
+  return wrap;
+}
+
+/* ============================ setup render ============================ */
+
+var $ = function(id){ return document.getElementById(id); };
+
+function renderChips(){
+  var host = $("chips");
+  host.innerHTML = "";
+  state.routines.forEach(function(r){
+    var b = document.createElement("button");
+    b.className = "chip" + (r.id === state.activeId ? " on" : "");
+    b.textContent = r.name || "Untitled";
+    b.addEventListener("click", function(){ state.activeId = r.id; save(); renderAll(); });
+    host.appendChild(b);
+  });
+  var add = document.createElement("button");
+  add.className = "chip add";
+  add.textContent = "+ New";
+  add.addEventListener("click", function(){
+    var r = { id: uid(), name: "New routine", prepare: 10, cooldown: 0,
+              blocks: [{ id: uid(), name: "Round", work: 40, rest: 20, rounds: 8 }] };
+    state.routines.push(r); state.activeId = r.id; save(); renderAll();
+    $("routineName").focus(); $("routineName").select();
+  });
+  host.appendChild(add);
+}
+
+function renderRibbon(){
+  var steps = compile(routine()), total = totalOf(steps) || 1;
+  var host = $("ribbon");
+  host.innerHTML = "";
+  steps.forEach(function(s){
+    var d = document.createElement("div");
+    d.className = "seg " + s.kind;
+    d.style.flex = s.dur + " 0 0";
+    d.title = s.label + (s.name ? " · " + s.name : "") + " · " + s.dur + "s";
+    host.appendChild(d);
+  });
+  $("totalTime").textContent = steps.length ? mmss(total) + " total" : "empty";
+}
+
+function renderBlocks(){
+  var r = routine(), host = $("blocks");
+  host.innerHTML = "";
+
+  r.blocks.forEach(function(b, i){
+    var card = document.createElement("div");
+    card.className = "block";
+
+    var head = document.createElement("div");
+    head.className = "blockhead";
+
+    var name = document.createElement("input");
+    name.className = "blockname";
+    name.value = b.name;
+    name.spellcheck = false;
+    name.setAttribute("aria-label", "Name for rounds group " + (i+1));
+    name.addEventListener("input", function(){ b.name = name.value; save(); });
+    head.appendChild(name);
+
+    head.appendChild(miniBtn("M12 5v14M5 12l7-7 7 7", "Move up", i === 0, function(){
+      r.blocks.splice(i-1, 0, r.blocks.splice(i,1)[0]); save(); renderAll();
+    }));
+    head.appendChild(miniBtn("M12 19V5M5 12l7 7 7-7", "Move down", i === r.blocks.length-1, function(){
+      r.blocks.splice(i+1, 0, r.blocks.splice(i,1)[0]); save(); renderAll();
+    }));
+    head.appendChild(miniBtn("M6 6l12 12M18 6L6 18", "Remove", r.blocks.length === 1, function(){
+      r.blocks.splice(i,1); save(); renderAll();
+    }));
+    card.appendChild(head);
+
+    var fields = document.createElement("div");
+    fields.className = "fields";
+    fields.appendChild(numberField({ label:"Work", value:b.work, min:1, max:3600, step:5, suffix:"sec", showMinutes:true,
+      onChange:function(v){ b.work = v; save(); renderRibbon(); } }));
+    fields.appendChild(numberField({ label:"Rest", value:b.rest, min:0, max:3600, step:5, suffix:"sec", showMinutes:true,
+      onChange:function(v){ b.rest = v; save(); renderRibbon(); } }));
+    fields.appendChild(numberField({ label:"Rounds", value:b.rounds, min:1, max:99, step:1, suffix:"×",
+      onChange:function(v){ b.rounds = v; save(); renderRibbon(); } }));
+    card.appendChild(fields);
+
+    host.appendChild(card);
+  });
+}
+
+function miniBtn(path, label, disabled, fn){
+  var b = document.createElement("button");
+  b.className = "minibtn";
+  b.type = "button";
+  b.title = label;
+  b.setAttribute("aria-label", label);
+  b.disabled = !!disabled;
+  b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + path + '"/></svg>';
+  b.addEventListener("click", fn);
+  return b;
+}
+
+function renderEdges(){
+  var r = routine();
+  var pm = $("prepMount"), cm = $("coolMount");
+  pm.innerHTML = ""; cm.innerHTML = "";
+  pm.appendChild(numberField({ label:"Seconds", value:r.prepare, min:0, max:600, step:5, suffix:"", showMinutes:true,
+    onChange:function(v){ r.prepare = v; save(); renderRibbon(); } }));
+  cm.appendChild(numberField({ label:"Seconds", value:r.cooldown, min:0, max:3600, step:15, suffix:"", showMinutes:true,
+    onChange:function(v){ r.cooldown = v; save(); renderRibbon(); } }));
+}
+
+function renderAll(){
+  var r = routine();
+  $("routineName").value = r.name;
+  renderChips();
+  renderRibbon();
+  renderBlocks();
+  renderEdges();
+  paintToggles();
+  paintAudioStatus();
+}
+
+$("routineName").addEventListener("input", function(){
+  routine().name = $("routineName").value; save(); renderChips();
+});
+$("addBlock").addEventListener("click", function(){
+  routine().blocks.push({ id: uid(), name: "Round", work: 40, rest: 20, rounds: 6 });
+  save(); renderAll();
+});
+$("dupBtn").addEventListener("click", function(){
+  var copy = JSON.parse(JSON.stringify(routine()));
+  copy.id = uid(); copy.name = copy.name + " copy";
+  copy.blocks.forEach(function(b){ b.id = uid(); });
+  state.routines.push(copy); state.activeId = copy.id; save(); renderAll();
+});
+$("delBtn").addEventListener("click", function(){
+  if(state.routines.length === 1){ alert("This is your only routine. Make another one first."); return; }
+  if(!confirm('Delete "' + routine().name + '"?')) return;
+  state.routines = state.routines.filter(function(r){ return r.id !== state.activeId; });
+  state.activeId = state.routines[0].id; save(); renderAll();
+});
+$("exportBtn").addEventListener("click", function(){
+  var text = JSON.stringify(state.routines);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      $("exportBtn").textContent = "Copied";
+      setTimeout(function(){ $("exportBtn").textContent = "Copy backup"; }, 1600);
+    }, function(){ window.prompt("Copy this text and keep it somewhere safe:", text); });
+  } else {
+    window.prompt("Copy this text and keep it somewhere safe:", text);
+  }
+});
+$("importBtn").addEventListener("click", function(){
+  var text = window.prompt("Paste a backup here. This replaces your routines.");
+  if(!text) return;
+  try {
+    var list = JSON.parse(text);
+    if(!Array.isArray(list) || !list.length) throw new Error("bad");
+    list.forEach(function(r){
+      if(!r.id) r.id = uid();
+      if(!Array.isArray(r.blocks) || !r.blocks.length) throw new Error("bad");
+    });
+    state.routines = list; state.activeId = list[0].id; save(); renderAll();
+  } catch(e){
+    alert("That backup could not be read. Check you pasted the whole thing.");
+  }
+});
+
+/* Says out loud what the browser's audio engine is actually doing, because
+   "no sound" has half a dozen causes that look identical from the outside. */
+function paintAudioStatus(extra){
+  var el = $("audioStatus"), bits = [];
+  if(!AC) bits.push("This browser has no Web Audio — beeps cannot play.");
+  else if(!ctx) bits.push("Audio opens on your first tap.");
+  else bits.push("Audio: " + ctx.state);
+  try {
+    if(navigator.audioSession && navigator.audioSession.type)
+      bits.push("route: " + navigator.audioSession.type);
+  } catch(e){}
+  bits.push("engine: " + state.engine);
+  try {
+    var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    bits.push(standalone ? "home-screen app" : "browser tab");
+  } catch(e){}
+  if(!state.sound) bits.push("MUTED IN THE APP — tap the speaker icon");
+  $("levelBtn").textContent = "Beep: " + LEVEL_NAMES[(state.beepLevel || 2) - 1];
+  $("engineBtn").textContent = state.engine === "tone" ? "Beeps: with music" : "Beeps: over silent";
+  if(extra) bits.push(extra);
+  el.textContent = bits.join(" · ");
+}
+
+/* The engine button is gone on purpose. Playing a media clip takes iOS's audio
+   session and stops whatever else is playing — and the one rule here is that
+   music never stops. Leaving a button that could do it was a footgun, not a
+   choice. The media code stays for the test below only. */
+
+$("engineBtn").addEventListener("click", function(){
+  state.engine = state.engine === "tone" ? "media" : "tone";
+  save();
+  unlockAudio(); unlockMedia(true);
+  var keep = state.sound;
+  state.sound = true;
+  emit("work", 0.03, null);
+  state.sound = keep;
+  paintAudioStatus(state.engine === "tone"
+    ? "mixes with music, needs Silent Mode OFF"
+    : "plays in Silent Mode, but music will stop");
+  setTimeout(function(){ paintAudioStatus(); }, 5000);
+});
+
+$("levelBtn").addEventListener("click", function(){
+  state.beepLevel = (state.beepLevel || 2) % 3 + 1;   // soft → medium → loud → soft
+  save();
+  unlockAudio();
+  var was = state.sound;
+  state.sound = true;
+  emit("work", 0.03, null);          // hear the new level as you set it
+  state.sound = was;
+  paintAudioStatus();
+});
+
+/* Plays the tone first, then the clip, each announced — one tap says which one
+   this phone lets through, instead of guessing from "I hear nothing".
+   NOTE: the clip half will interrupt music. Only for deliberate testing. */
+$("testBtn").addEventListener("click", function(){
+  unlockAudio();
+  unlockMedia(true);
+  // Turn sound ON rather than bypassing the mute for the duration of the test.
+  // A test that passes while the app is muted is worse than no test.
+  if(!state.sound){ state.sound = true; save(); paintToggles(); }
+  var was = state.sound;
+
+  sayNow("One", 1);
+  if(ctx) VOICES.work(ctx.currentTime + 0.6);          // engine A: Web Audio
+  setTimeout(function(){ sayNow("Two", 1); }, 1900);
+  setTimeout(function(){ playMedia("work"); }, 2600);  // engine B: media clip
+
+  state.sound = was;
+  paintAudioStatus('listen for: "One" + beep, then "Two" + beep');
+  setTimeout(function(){ paintAudioStatus(); }, 7000);
+});
+
+function paintToggles(){
+  $("soundBtn").setAttribute("aria-pressed", state.sound ? "true" : "false");
+  $("soundIcon").innerHTML = state.sound
+    ? '<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/>'
+    : '<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M16 9l5 6M21 9l-5 6"/>';
+  $("vibeBtn").setAttribute("aria-pressed", state.vibrate ? "true" : "false");
+  $("voiceBtn").setAttribute("aria-pressed", (state.voice && !!synth) ? "true" : "false");
+}
+$("soundBtn").addEventListener("click", function(){
+  state.sound = !state.sound; save(); paintToggles();
+  if(state.sound){ unlockAudio(); unlockMedia(); emit("tick", 0.02, null); }
+  else clearScheduled();
+});
+$("vibeBtn").addEventListener("click", function(){
+  state.vibrate = !state.vibrate; save(); paintToggles();
+  if(state.vibrate) buzz(40);
+});
+$("voiceBtn").addEventListener("click", function(){
+  if(!synth && !state.voice){ alert("This browser cannot speak the count. The beeps still work."); return; }
+  state.voice = !state.voice; save(); paintToggles();
+  if(state.voice) speak(3); else hushVoice();
+});
+
+/* ============================ run engine ============================ */
+
+var run = {
+  active: false, paused: false, done: false,
+  steps: [], i: 0, cues: null,
+  endAt: 0,        // wall-clock ms when the current step ends
+  leftWhenPaused: 0,
+  elapsedBefore: 0 // seconds of steps already completed
+};
+
+var PHASE_VAR = { prep:"--prep", work:"--work", rest:"--rest", cool:"--done" };
+
+function startRun(){
+  var steps = compile(routine());
+  if(!steps.length){ alert("Add at least one round before starting."); return; }
+  ensureAudio();
+  run.steps = steps; run.i = 0; run.active = true; run.paused = false; run.done = false;
+  run.elapsedBefore = 0;
+  $("run").classList.add("on");
+  $("run").classList.remove("paused");
+  setPausedIcon(false);
+  $("playBtn").setAttribute("aria-label", "Pause");
+  $("doneCard").hidden = true;
+  $("clockZone").hidden = false;
+  $("controls").hidden = false;
+  $("endRow").hidden = false;
+  keepScreenOn(true);
+  enterStep(0, true);
+  if(!run.looping){ run.looping = true; tick(); }
+}
+
+/* soundNow: true when we jumped here by hand (Start, skip, back), so no tone
+   from a previous step is already arriving to mark the change. */
+function enterStep(i, soundNow){
+  run.i = i;
+  var s = run.steps[i];
+  run.elapsedBefore = run.steps.slice(0, i).reduce(function(a,x){ return a + x.dur; }, 0);
+  run.endAt = Date.now() + s.dur * 1000;
+
+  document.documentElement.style.setProperty("--phase", "var(" + PHASE_VAR[s.kind] + ")");
+
+  $("phaseLabel").textContent = s.label;
+  $("exerciseLabel").textContent = s.name || "";
+  $("roundTag").textContent = s.round ? "Round " + s.round + " / " + s.of : "";
+
+  var next = run.steps[i+1];
+  $("nextUp").innerHTML = next
+    ? 'Next <b>' + escapeHtml(next.label) + (next.name ? " · " + escapeHtml(next.name) : "") + " " + next.dur + 's</b>'
+    : 'Last one';
+
+  // the last three seconds are tinted with whatever comes next
+  document.documentElement.style.setProperty("--next",
+    "var(" + (next ? PHASE_VAR[next.kind] : "--done") + ")");
+  // NEVER hush here: this line is immediately followed by speaking the cue for
+  // the step being entered, and cancel()-then-speak() is the iOS race that
+  // drops the utterance and can wedge the engine for the whole session.
+  resetCountdown(false);
+
+  clearScheduled(soundNow ? null : "change");
+  run.cues = buildCues(s.dur, next ? next.kind : null);
+  if(!run.paused){
+    ensureAudio();
+    // Announce the step we are entering. Driven by the transition itself rather
+    // than a timer due at the same instant, which is what kept losing it.
+    emit(s.kind, 0.02, null);
+    if(soundNow) sayCue(s.kind, 0);   // on a natural advance it was spoken early
+    scheduleStepCues(s.dur);
+  } else {
+    clearCueTimers();
+  }
+  if(!state.sound) markVoice("sound off — tap the speaker");
+  flashScreen();
+  buzz(s.kind === "work" ? [30,60,30] : 40);
+}
+
+/* hush only when we jumped by hand. On a natural change the cue for the step we
+   are entering ("Go", "Rest", "Finished") is already speaking at this exact
+   instant — cancelling here is what silenced every one of them. */
+function resetCountdown(hush){
+  run.lastCd = 0;
+  $("run").classList.remove("counting");
+  $("ghost").classList.remove("pop");
+  $("ghost").textContent = "";
+  if(hush) hushVoice();
+}
+
+function showGhost(n){
+  var g = $("ghost");
+  g.textContent = String(n);
+  g.classList.remove("pop");
+  void g.offsetWidth;           // force the animation to restart on each second
+  g.classList.add("pop");
+}
+
+function escapeHtml(t){
+  return String(t).replace(/[&<>"]/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+  });
+}
+
+function advance(natural){
+  if(run.i + 1 < run.steps.length){ enterStep(run.i + 1, !natural); }
+  else finish(!natural);
+}
+
+function goPrev(){
+  var s = run.steps[run.i];
+  var spent = s.dur - remaining();
+  // first tap restarts the current step, second goes back one
+  if(spent > 2 || run.i === 0) enterStep(run.i, true);
+  else enterStep(run.i - 1, true);
+}
+
+function remaining(){
+  if(run.paused) return run.leftWhenPaused;
+  return Math.max(0, (run.endAt - Date.now()) / 1000);
+}
+
+function setPaused(p){
+  if(!run.active || run.done) return;
+  run.paused = p;
+  if(p){
+    run.leftWhenPaused = remaining();
+    clearScheduled();
+    clearCueTimers();
+    hushVoice();
+    $("run").classList.remove("counting");
+    keepScreenOn(false);
+  } else {
+    ensureAudio();
+    run.endAt = Date.now() + run.leftWhenPaused * 1000;
+    scheduleStepCues(run.leftWhenPaused);   // re-arm whatever is still ahead
+    keepScreenOn(true);
+  }
+  $("run").classList.toggle("paused", p);
+  $("playBtn").setAttribute("aria-label", p ? "Resume" : "Pause");
+  $("playIcon").innerHTML = p ? '<path d="M7 4l13 8-13 8z"/>' : '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
+}
+
+function finish(soundNow){
+  run.done = true;
+  clearCueTimers();
+  resetCountdown(false);        // "Finished" is spoken just below
+  // the closing cue belongs to finishing, not to the last step's timer
+  clearScheduled();
+  ensureAudio();
+  emit("done", 0.02, null);
+  if(soundNow) sayCue("done", 0);   // likewise — already spoken just before the end
+  buzz([80,80,80,80,180]);
+  keepScreenOn(false);
+  $("clockZone").hidden = true;
+  $("controls").hidden = true;
+  $("endRow").hidden = true;
+  $("doneCard").hidden = false;
+  document.documentElement.style.setProperty("--phase", "var(--done)");
+  var total = totalOf(run.steps);
+  var rounds = run.steps.filter(function(s){ return s.kind === "work"; }).length;
+  $("doneSub").textContent = rounds + " rounds · " + human(total);
+  $("railFill").style.width = "100%";
+}
+
+function endRun(){
+  run.active = false; run.done = false;
+  clearScheduled();
+  clearCueTimers();
+  resetCountdown(true);
+  keepScreenOn(false);
+  $("run").classList.remove("on", "paused");
+  document.documentElement.style.setProperty("--phase", "var(--work)");
+  setPausedIcon(false);
+}
+function setPausedIcon(p){
+  $("playIcon").innerHTML = p ? '<path d="M7 4l13 8-13 8z"/>' : '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
+}
+
+/* one clock, driven by wall time, so a throttled tab catches up instead of drifting */
+function tick(){
+  if(!run.active){ run.looping = false; return; }
+  frame();
+  requestAnimationFrame(tick);
+}
+
+/* A backgrounded tab stops painting frames, so the same work also runs on a
+   timer. Both paths are safe to run in the same moment: cues fire once, and the
+   DOM writes land on the same values. */
+setInterval(function(){ if(run.active && !run.paused) frame(); }, 250);
+
+function frame(){
+  if(!run.done){
+    var s = run.steps[run.i];
+    var left = remaining();
+
+    if(left <= 0 && !run.paused){ advance(true); }
+    else {
+      $("clock").textContent = mmss(left);
+      $("stepFill").style.width = (s.dur ? (left / s.dur) * 100 : 0) + "%";
+
+      // final three seconds: big 3 · 2 · 1 behind the clock, in step with the beeps.
+      // The window is exactly 3s — any slack above it and ceil() opens on "4".
+      var counting = !run.paused && left > 0 && left <= 3;
+      $("run").classList.toggle("counting", counting);
+      if(counting){
+        var cd = Math.min(3, Math.ceil(left));
+        if(cd !== run.lastCd){ run.lastCd = cd; showGhost(cd); }
+      } else if(run.lastCd){
+        run.lastCd = 0;
+      }
+
+      var doneSecs = run.elapsedBefore + (s.dur - left);
+      var total = totalOf(run.steps);
+      $("railFill").style.width = (total ? (doneSecs / total) * 100 : 0) + "%";
+      $("leftTag").textContent = mmss(total - doneSecs) + " left";
+    }
+  }
+}
+
+/* ============================ run controls ============================ */
+
+$("startBtn").addEventListener("click", function(){ unlockAudio(); unlockMedia(); startRun(); });
+$("playBtn").addEventListener("click", function(){ setPaused(!run.paused); });
+$("skipBtn").addEventListener("click", function(){ if(!run.done) advance(false); });
+$("prevBtn").addEventListener("click", function(){ if(!run.done) goPrev(); });
+$("againBtn").addEventListener("click", function(){ startRun(); });
+$("closeBtn").addEventListener("click", endRun);
+
+/* hold to end — a stray tap mid-workout should not kill the session */
+(function(){
+  var btn = $("endBtn"), timer = null;
+  function arm(e){
+    if(e.type === "mousedown" && e.button !== 0) return;
+    btn.classList.add("arming");
+    timer = setTimeout(function(){ btn.classList.remove("arming"); endRun(); }, 760);
+  }
+  function disarm(){
+    btn.classList.remove("arming");
+    if(timer){ clearTimeout(timer); timer = null; }
+  }
+  btn.addEventListener("mousedown", arm);
+  btn.addEventListener("touchstart", arm, { passive:true });
+  ["mouseup","mouseleave","touchend","touchcancel","blur"].forEach(function(ev){
+    btn.addEventListener(ev, disarm);
+  });
+})();
+
+document.addEventListener("keydown", function(e){
+  if(!run.active) return;
+  if(e.key === " "){ e.preventDefault(); setPaused(!run.paused); }
+  else if(e.key === "ArrowRight"){ e.preventDefault(); if(!run.done) advance(false); }
+  else if(e.key === "ArrowLeft"){ e.preventDefault(); if(!run.done) goPrev(); }
+  else if(e.key === "Escape"){ e.preventDefault(); endRun(); }
+});
+
+/* ============================ go ============================ */
+
+renderAll();
+})();
+</script>
+
+</body></html>

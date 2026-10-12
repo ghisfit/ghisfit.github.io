@@ -1,0 +1,271 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Net Worth Ledger</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow ledger column. Total first, then trend, accounts, split, history. */
+:root {
+  --bg: #F2F5F8; --surface: #FFFFFF; --ink: #15202B; --muted: #5C6B7A; --line: #D6DDE5;
+  --accent: #1D5FA6; --accent-soft: #E3EDF8;
+  --up: #1B7A4D; --down: #B23F2E; --warn: #8A5A00; --warn-soft: #FBF0D6;
+  --c-cash: #1D5FA6; --c-savings: #3F8FA8; --c-invest: #6A54A8; --c-pension: #A8642B;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F151B; --surface: #172029; --ink: #E7EDF3; --muted: #93A2B1; --line: #2A3743;
+    --accent: #74ABEA; --accent-soft: #1C2C3E;
+    --up: #5FC391; --down: #E88D79; --warn: #E5B95A; --warn-soft: #33290F;
+    --c-cash: #74ABEA; --c-savings: #6CC0D6; --c-invest: #A593E0; --c-pension: #DDA06A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F151B; --surface: #172029; --ink: #E7EDF3; --muted: #93A2B1; --line: #2A3743;
+  --accent: #74ABEA; --accent-soft: #1C2C3E;
+  --up: #5FC391; --down: #E88D79; --warn: #E5B95A; --warn-soft: #33290F;
+  --c-cash: #74ABEA; --c-savings: #6CC0D6; --c-invest: #A593E0; --c-pension: #DDA06A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; letter-spacing: -0.01em; }
+.sub { color: var(--muted); font-size: 0.875rem; margin: 2px 0 0; }
+.toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.toggle button { font: 500 0.875rem var(--mono); padding: 7px 14px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+.toggle button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
+.total { display: flex; flex-direction: column; gap: 6px; border-top: 3px solid var(--ink); padding-top: 16px; }
+.figure { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 9vw, 3.6rem); line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--muted); font-size: 0.9rem; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.up { color: var(--up); } .down { color: var(--down); }
+.pill { font-size: 0.75rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+section { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+h2 { font-family: var(--display); font-weight: 500; font-size: 1.05rem; margin: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.pad { padding: 16px; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+td.r, th.r { text-align: right; }
+td .small { display: block; color: var(--muted); font-size: 0.8rem; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 8px; }
+.note { color: var(--muted); font-size: 0.9rem; margin: 0; max-width: 65ch; }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: var(--line); }
+.bar span { display: block; height: 100%; }
+.legend { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 0.875rem; }
+.legend li { display: flex; justify-content: space-between; gap: 12px; }
+svg { display: block; width: 100%; height: auto; }
+svg text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Net Worth Ledger</h1>
+      <p class="sub" id="asof">Loading your ledger…</p>
+    </div>
+    <div class="toggle" role="group" aria-label="Display currency">
+      <button id="cur-jpy" type="button" aria-pressed="true">¥ JPY</button>
+      <button id="cur-eur" type="button" aria-pressed="false">€ EUR</button>
+    </div>
+  </header>
+
+  <div class="total">
+    <span class="label">Total across all accounts</span>
+    <div class="figure" id="total">—</div>
+    <div class="meta" id="totalmeta"></div>
+  </div>
+
+  <section>
+    <h2>Trend</h2>
+    <div class="panel pad" id="trend"><p class="note">The trend line appears after two monthly updates.</p></div>
+  </section>
+
+  <section>
+    <h2>Accounts</h2>
+    <div class="panel scroll" id="accounts"><p class="note pad">Your accounts will be listed here.</p></div>
+  </section>
+
+  <section>
+    <h2>Where the money sits</h2>
+    <div class="split" id="split"><div class="panel pad"><p class="note">The split by type and currency appears with the first balances.</p></div></div>
+  </section>
+
+  <section>
+    <h2>Month by month</h2>
+    <div class="panel scroll" id="history"><p class="note pad">One row per month will build up here.</p></div>
+  </section>
+
+  <p class="note">Balances are entered by Claude from the figures you send in chat, then published here. Nothing on this page is linked to your banks.</p>
+</div>
+
+<script>
+(function () {
+  var KINDS = { cash: ["Cash", "--c-cash"], savings: ["Savings", "--c-savings"], investment: ["Investments", "--c-invest"], pension: ["Pension", "--c-pension"], debt: ["Debt", "--down"] };
+  var accounts = [], months = [], display = "JPY", ready = false;
+  try { var saved = localStorage.getItem("nwl-cur"); if (saved === "EUR" || saved === "JPY") display = saved; } catch (e) {}
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function fmt(n, cur, compact) {
+    if (n == null || isNaN(n)) return "—";
+    var o = { style: "currency", currency: cur, maximumFractionDigits: 0 };
+    if (compact) { o.notation = "compact"; o.maximumFractionDigits = 1; }
+    return new Intl.NumberFormat("en-US", o).format(n);
+  }
+  function monthLabel(id) {
+    var p = String(id).split("-"), d = new Date(Number(p[0]), Number(p[1]) - 1, 1);
+    return isNaN(d) ? String(id) : d.toLocaleString("en-US", { month: "short", year: "numeric" });
+  }
+  function convert(n, from, to, rate) {
+    if (n == null) return null;
+    if (from === to) return n;
+    if (!rate) return null;
+    return from === "EUR" ? n * rate : n / rate;
+  }
+  function bal(m, a) { var b = m && m.balances ? m.balances[a.id] : null; return typeof b === "number" ? b : null; }
+  function totalOf(m) {
+    var sum = 0, any = false, missingRate = false;
+    accounts.forEach(function (a) {
+      var b = bal(m, a); if (b == null) return;
+      var c = convert(b, a.currency, display, m.eurJpy);
+      if (c == null) { missingRate = true; return; }
+      sum += c; any = true;
+    });
+    return { value: any ? sum : null, missingRate: missingRate };
+  }
+  function delta(now, before, cur) {
+    if (now == null || before == null) return "";
+    var d = now - before; if (Math.round(d) === 0) return '<span class="num">no change</span>';
+    var pct = before ? " (" + (d > 0 ? "+" : "") + (d / before * 100).toFixed(1) + "%)" : "";
+    return '<span class="num ' + (d > 0 ? "up" : "down") + '">' + (d > 0 ? "▲ +" : "▼ ") + fmt(d, cur) + pct + "</span>";
+  }
+
+  function render() {
+    $("cur-jpy").setAttribute("aria-pressed", String(display === "JPY"));
+    $("cur-eur").setAttribute("aria-pressed", String(display === "EUR"));
+    if (!ready) return;
+    var filled = months.filter(function (m) { return m.balances && Object.keys(m.balances).length; });
+    var latest = filled[filled.length - 1], prev = filled[filled.length - 2];
+
+    // header + total
+    if (!latest) {
+      $("asof").textContent = "No balances yet";
+      $("total").textContent = "—";
+      $("totalmeta").innerHTML = '<span>Send Claude your balances in chat and this page fills in.</span>';
+    } else {
+      var t = totalOf(latest), tp = prev ? totalOf(prev) : { value: null };
+      var now = new Date(), cur = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+      $("asof").textContent = "As of " + monthLabel(latest.id) + (latest.updatedAt ? " · entered " + latest.updatedAt : "");
+      $("total").textContent = fmt(t.value, display);
+      var meta = [];
+      meta.push(latest.id < cur ? '<span class="pill warn">Due for an update</span>' : '<span class="pill">Up to date</span>');
+      if (prev) meta.push(delta(t.value, tp.value, display) + ' <span>since ' + esc(monthLabel(prev.id)) + "</span>");
+      if (latest.eurJpy) meta.push('<span class="num">1 € = ¥' + Number(latest.eurJpy).toFixed(2) + "</span>");
+      if (t.missingRate) meta.push('<span class="pill warn">Some accounts left out: no € rate for this month</span>');
+      $("totalmeta").innerHTML = meta.join("");
+    }
+
+    // accounts table
+    if (!accounts.length) {
+      $("accounts").innerHTML = '<p class="note pad">No accounts yet. Tell Claude which accounts to track.</p>';
+    } else {
+      var rows = accounts.map(function (a) {
+        var k = KINDS[a.kind] || [a.kind || "Other", "--c-cash"];
+        var b = bal(latest, a), pb = bal(prev, a);
+        var conv = latest ? convert(b, a.currency, display, latest.eurJpy) : null;
+        return "<tr><td>" + '<span class="dot" style="background:var(' + k[1] + ')"></span>' + esc(a.name) +
+          '<span class="small">' + esc(a.institution || "") + (a.note ? " · " + esc(a.note) : "") + "</span></td>" +
+          "<td>" + esc(k[0]) + "</td>" +
+          '<td class="r num">' + fmt(b, a.currency) + "</td>" +
+          '<td class="r num">' + (a.currency === display ? "" : fmt(conv, display)) + "</td>" +
+          '<td class="r">' + (delta(b, pb, a.currency) || '<span class="num">—</span>') + "</td></tr>";
+      }).join("");
+      $("accounts").innerHTML = '<table><thead><tr><th>Account</th><th>Type</th><th class="r">Balance</th><th class="r">In ' + display +
+        '</th><th class="r">Since last month</th></tr></thead><tbody>' + rows + "</tbody></table>";
+    }
+
+    // split
+    if (latest && totalOf(latest).value) {
+      var byKind = {}, byCur = {}, tot = 0;
+      accounts.forEach(function (a) {
+        var c = convert(bal(latest, a), a.currency, display, latest.eurJpy); if (c == null || c <= 0) return;
+        byKind[a.kind] = (byKind[a.kind] || 0) + c; byCur[a.currency] = (byCur[a.currency] || 0) + c; tot += c;
+      });
+      var block = function (title, obj, labelOf, colorOf) {
+        var keys = Object.keys(obj).sort(function (x, y) { return obj[y] - obj[x]; });
+        return '<div class="panel pad"><span class="label">' + title + '</span><div class="bar" style="margin-top:10px">' +
+          keys.map(function (k) { return '<span style="width:' + (obj[k] / tot * 100).toFixed(2) + "%;background:var(" + colorOf(k) + ')"></span>'; }).join("") +
+          '</div><ul class="legend">' + keys.map(function (k) {
+            return '<li><span><span class="dot" style="background:var(' + colorOf(k) + ')"></span>' + esc(labelOf(k)) + '</span><span class="num">' +
+              fmt(obj[k], display) + " · " + (obj[k] / tot * 100).toFixed(0) + "%</span></li>";
+          }).join("") + "</ul></div>";
+      };
+      $("split").innerHTML =
+        block("By type", byKind, function (k) { return (KINDS[k] || [k])[0]; }, function (k) { return (KINDS[k] || [0, "--c-cash"])[1]; }) +
+        block("By currency held", byCur, function (k) { return k === "JPY" ? "Yen accounts" : k === "EUR" ? "Euro accounts" : k; }, function (k) { return k === "JPY" ? "--c-cash" : "--c-pension"; });
+    }
+
+    // trend
+    var pts = filled.map(function (m) { return { id: m.id, v: totalOf(m).value }; }).filter(function (p) { return p.v != null; });
+    if (pts.length >= 2) {
+      var W = 720, H = 220, L = 64, R = 20, T = 16, B = 30;
+      var vs = pts.map(function (p) { return p.v; }), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+      var padv = (hi - lo) * 0.15 || hi * 0.05 || 1; lo -= padv; hi += padv;
+      var x = function (i) { return L + (W - L - R) * i / (pts.length - 1); };
+      var y = function (v) { return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); };
+      var line = pts.map(function (p, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.v).toFixed(1); }).join(" ");
+      var area = line + " L" + x(pts.length - 1).toFixed(1) + " " + (H - B) + " L" + x(0).toFixed(1) + " " + (H - B) + " Z";
+      var grid = [0, 0.5, 1].map(function (f) {
+        var v = lo + (hi - lo) * f, yy = y(v).toFixed(1);
+        return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '" stroke="var(--line)" stroke-width="1" fill="none"/>' +
+          '<text x="' + (L - 8) + '" y="' + (Number(yy) + 4) + '" text-anchor="end">' + esc(fmt(v, display, true)) + "</text>";
+      }).join("");
+      var step = Math.ceil(pts.length / 6);
+      var xl = pts.map(function (p, i) {
+        if (i % step && i !== pts.length - 1) return "";
+        return '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (i === 0 ? "start" : i === pts.length - 1 ? "end" : "middle") + '">' + esc(monthLabel(p.id)) + "</text>";
+      }).join("");
+      var last = pts[pts.length - 1];
+      $("trend").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Total net worth by month">' + grid +
+        '<path d="' + area + '" fill="var(--accent-soft)" stroke="none"/>' +
+        '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>' +
+        '<circle cx="' + x(pts.length - 1).toFixed(1) + '" cy="' + y(last.v).toFixed(1) + '" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>' + xl + "</svg>";
+    }
+
+    // history
+    if (filled.length && accounts.length) {
+      var head = "<th>Month</th>" + accounts.map(function (a) { return '<th class="r">' + esc(a.name) + "</th>"; }).join("") + '<th class="r">Total (' + display + ")</th>";
+      var body = filled.slice().reverse().map(function (m) {
+        return "<tr><td>" + esc(monthLabel(m.id)) + "</td>" + accounts.map(function (a) {
+          return '<td class="r num">' + fmt(bal(m, a), a.currency) + "</td>";
+        }).join("") + '<td class="r num"><strong>' + fmt(totalOf(m).value, display) + "</strong></td></tr>";
+      }).join("");
+      $("history").innerHTML = "<table><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody></table>";
+    }
+  }
+
+  function setCur(c) { display = c; try { localStorage.setItem("nwl-cur", c); } catch (e) {} render(); }
+  $("cur-jpy").addEventListener("click", function () { setCur("JPY"); });
+  $("cur-eur").addEventListener("click", function () { setCur("EUR"); });
+  render();
+
+  fetch("data.json", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) {
+    accounts = (d.accounts || []).slice().sort(function (p, q) { return (p.order || 0) - (q.order || 0); });
+    months = (d.months || []).slice().sort(function (p, q) { return p.id < q.id ? -1 : 1; });
+    ready = true; render();
+  }).catch(function () { $("asof").textContent = "Could not load the figures. Check your connection and reload."; });
+})();
+</script>
+
+</body></html>

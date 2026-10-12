@@ -1,0 +1,320 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Taipei Trip</title>
+<style>
+:root{
+  --bg:#faf7f2;
+  --surface:#ffffff;
+  --border:#e6ddd0;
+  --text:#2b2620;
+  --text-dim:#8a8071;
+  --accent:#c05b2e;
+  --accent-bg:#fdece2;
+  --day-bg:#f1ece2;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1c1a17;
+    --surface:#252220;
+    --border:#3a352e;
+    --text:#f0ebe2;
+    --text-dim:#a89f8f;
+    --accent:#e8935f;
+    --accent-bg:#3a2a1f;
+    --day-bg:#2c2823;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1c1a17;
+  --surface:#252220;
+  --border:#3a352e;
+  --text:#f0ebe2;
+  --text-dim:#a89f8f;
+  --accent:#e8935f;
+  --accent-bg:#3a2a1f;
+  --day-bg:#2c2823;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  padding:24px 16px 40px;
+}
+.wrap{max-width:640px;margin:0 auto;}
+h1{
+  font-size:1.5rem;
+  margin:0 0 4px;
+  letter-spacing:-0.01em;
+}
+.sub{
+  color:var(--text-dim);
+  font-size:0.9rem;
+  margin:0 0 20px;
+}
+.copybar{
+  position:sticky;
+  top:env(safe-area-inset-top,0px);
+  z-index:10;
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+button#copyBtn{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:14px 18px;
+  border-radius:12px;
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  font-size:1rem;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  transition:transform 0.1s ease, background 0.2s ease;
+}
+button#copyBtn:active{transform:scale(0.98);}
+button#copyBtn.copied{background:#3f9142;}
+.day{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.day-head{
+  background:var(--day-bg);
+  padding:10px 16px;
+  font-weight:700;
+  font-size:0.95rem;
+  letter-spacing:0.02em;
+}
+.day-body{padding:10px 16px 14px;}
+.row{
+  display:flex;
+  gap:12px;
+  align-items:baseline;
+  padding:6px 0;
+  border-bottom:1px solid var(--border);
+  font-size:0.92rem;
+}
+.row:last-child{border-bottom:none;}
+.time{
+  color:var(--accent);
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  min-width:98px;
+  font-weight:600;
+}
+.desc{color:var(--text);flex:1;}
+.maplink{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  margin-left:8px;
+  color:var(--accent);
+  text-decoration:none;
+  font-size:0.85em;
+  white-space:nowrap;
+  border-bottom:1px solid transparent;
+}
+.maplink:hover{border-bottom-color:var(--accent);}
+#srcText{position:absolute;left:-9999px;}
+</style>
+
+<div class="wrap">
+  <h1>Taipei Trip</h1>
+  <p class="sub">Nov 21&ndash;24, 2026 &middot; tap 📍 to open a place in Maps</p>
+
+  <div class="copybar">
+    <button id="copyBtn" onclick="copyAll()">Copy full itinerary</button>
+  </div>
+
+  <div id="days"></div>
+</div>
+
+<textarea id="srcText" readonly></textarea>
+
+<script>
+const plain = `Taipei Trip — Nov 21-24
+
+SAT NOV 21
+15:00 - Land Taoyuan Airport
+15:00-16:00 - Immigration, bags, Airport MRT to Taipei
+16:00-17:00 - Check in
+18:00 - Shilin Night Market
+18:30-21:00 - Food, browsing
+21:00 - MRT to Xinyi/Taipei 101
+21:30-22:30 - Walk Xinyi, see 101 lit up, optional Elephant Mountain night view
+23:00 - Back to hotel, sleep Taipei
+
+SUN NOV 22
+8:00-9:00 - Breakfast
+9:30 - Longshan Temple
+10:15 - Bopiliao Historic Block
+11:00 - MRT to Yongkang Street
+11:15-12:30 - Lunch, browse Yongkang Street
+12:30-13:00 - Optional: Da'an Forest Park
+13:00 - Meet friend
+13:30-14:00 - Depart Taipei by car to Hsinchu
+15:15 - Arrive Hsinchu
+Evening - With friends, sleep Hsinchu
+
+MON NOV 23
+Morning - Hsinchu
+11:00 - HSR Hsinchu to Tainan
+12:15-12:30 - Arrive Tainan, lunch
+13:30-14:00 - Pick up scooter
+14:00-17:00 - Anping loop (Old Street, Fort, canal, food)
+17:00-17:30 - Yuguang Island, sunset (~17:20)
+17:30-19:00 - Ride toward Rende/countryside, open fields
+19:00-20:00 - Dinner
+20:00 - Return scooter, head to HSR station
+20:30 - HSR Tainan to Taipei
+22:15-23:00 - Arrive Taipei, late check-in
+
+TUE NOV 24
+8:00-9:00 - Breakfast
+9:30-11:30 - Da'an Forest Park or Ximending, easy morning
+11:30-12:30 - Coffee/light lunch near hotel
+13:00 - Head to Taipei Main Station
+13:30 - Airport MRT to Taoyuan
+14:20 - Arrive Taoyuan Airport
+14:20-17:10 - Check-in, immigration, security
+17:10 - Flight departs`;
+
+function mapUrl(q){
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+}
+
+const days = [
+  {
+    label: "SAT NOV 21",
+    rows: [
+      ["15:00","Land Taoyuan Airport", "Taoyuan International Airport"],
+      ["15:00-16:00","Immigration, bags, Airport MRT to Taipei", null],
+      ["16:00-17:00","Check in", null],
+      ["18:00","Shilin Night Market", "Shilin Night Market Taipei"],
+      ["18:30-21:00","Food, browsing", null],
+      ["21:00","MRT to Xinyi / Taipei 101", "Taipei 101"],
+      ["21:30-22:30","Walk Xinyi, see 101 lit up, optional Elephant Mountain night view", "Xiangshan Elephant Mountain Taipei"],
+      ["23:00","Back to hotel, sleep Taipei", null]
+    ]
+  },
+  {
+    label: "SUN NOV 22",
+    rows: [
+      ["8:00-9:00","Breakfast", null],
+      ["9:30","Longshan Temple", "Longshan Temple Taipei"],
+      ["10:15","Bopiliao Historic Block", "Bopiliao Historic Block Taipei"],
+      ["11:00","MRT to Yongkang Street", "Yongkang Street Taipei"],
+      ["11:15-12:30","Lunch, browse Yongkang Street", null],
+      ["12:30-13:00","Optional: Da'an Forest Park", "Da'an Forest Park Taipei"],
+      ["13:00","Meet friend", null],
+      ["13:30-14:00","Depart Taipei by car to Hsinchu", "Hsinchu Taiwan"],
+      ["15:15","Arrive Hsinchu", null],
+      ["Evening","With friends, sleep Hsinchu", null]
+    ]
+  },
+  {
+    label: "MON NOV 23",
+    rows: [
+      ["Morning","Hsinchu", null],
+      ["11:00","HSR Hsinchu to Tainan", "Hsinchu HSR Station"],
+      ["12:15-12:30","Arrive Tainan, lunch", "Tainan Train Station"],
+      ["13:30-14:00","Pick up scooter", "起跑點機車出租 Tainan"],
+      ["14:00-17:00","Anping loop (Old Street, Fort, canal, food)", "Anping Old Street Tainan"],
+      ["17:00-17:30","Yuguang Island, sunset (~17:20)", "Yuguang Island Tainan"],
+      ["17:30-19:00","Ride toward Rende / countryside, open fields", "Rende District Tainan"],
+      ["19:00-20:00","Dinner", null],
+      ["20:00","Return scooter, head to HSR station", "Tainan HSR Station"],
+      ["20:30","HSR Tainan to Taipei", null],
+      ["22:15-23:00","Arrive Taipei, late check-in", null]
+    ]
+  },
+  {
+    label: "TUE NOV 24",
+    rows: [
+      ["8:00-9:00","Breakfast", null],
+      ["9:30-11:30","Da'an Forest Park or Ximending, easy morning", "Ximending Taipei"],
+      ["11:30-12:30","Coffee / light lunch near hotel", null],
+      ["13:00","Head to Taipei Main Station", "Taipei Main Station"],
+      ["13:30","Airport MRT to Taoyuan", null],
+      ["14:20","Arrive Taoyuan Airport", "Taoyuan International Airport"],
+      ["14:20-17:10","Check-in, immigration, security", null],
+      ["17:10","Flight departs", null]
+    ]
+  }
+];
+
+const container = document.getElementById('days');
+days.forEach(day => {
+  const dayEl = document.createElement('div');
+  dayEl.className = 'day';
+  const head = document.createElement('div');
+  head.className = 'day-head';
+  head.textContent = day.label;
+  dayEl.appendChild(head);
+  const body = document.createElement('div');
+  body.className = 'day-body';
+  day.rows.forEach(([t,d,place]) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const time = document.createElement('div');
+    time.className = 'time';
+    time.textContent = t;
+    const desc = document.createElement('div');
+    desc.className = 'desc';
+    desc.textContent = d;
+    if(place){
+      const a = document.createElement('a');
+      a.className = 'maplink';
+      a.href = mapUrl(place);
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = '📍';
+      desc.appendChild(a);
+    }
+    row.appendChild(time);
+    row.appendChild(desc);
+    body.appendChild(row);
+  });
+  dayEl.appendChild(body);
+  container.appendChild(dayEl);
+});
+
+function copyAll(){
+  const btn = document.getElementById('copyBtn');
+  function done(){
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='Copy full itinerary'; btn.classList.remove('copied'); }, 1800);
+  }
+  function fallback(){
+    const ta = document.getElementById('srcText');
+    ta.style.position = 'fixed';
+    ta.style.left = '0';
+    ta.style.top = '0';
+    ta.value = plain;
+    ta.focus();
+    ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    ta.style.position = 'absolute';
+    ta.style.left = '-9999px';
+    done();
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(plain).then(done).catch(fallback);
+  } else {
+    fallback();
+  }
+}
+</script>
+
+</body></html>

@@ -60,7 +60,6 @@ iframe{flex:1;width:100%;border:0;background:var(--surface)}
 <aside id="side" aria-label="Apps">
   <div class="brand">My apps</div>
   <nav id="nav"></nav>
-  <div class="foot">↗ opens in Claude</div>
 </aside>
 <div class="scrim" id="scrim"></div>
 <main>
@@ -69,36 +68,24 @@ iframe{flex:1;width:100%;border:0;background:var(--surface)}
 </main>
 <script>
 const APPS=[
- {g:"Daily",t:"Kotoba Deck",u:"/Kotoba-deck/",d:"Japanese flashcards"},
- {g:"Money",t:"Net Worth Ledger",u:"https://claude.ai/artifact/Ch36gd7cMiUQiTKsHtkhA9",d:"Monthly balances across Japan, Revolut and France."},
- {g:"Money",t:"Annonces Montpellier",u:"https://claude.ai/artifact/4VK7XT2L4CB1LZmzxHFq7d",d:"Apartments for sale under €120,000."},
- {g:"Money",t:"Plan 2026",u:"https://claude.ai/artifact/9TUtZNU3ecLusTCBCpnn7z",d:"Argent, dépenses et cartes."},
- {g:"Trips",t:"Taipei Trip",u:"https://claude.ai/artifact/5jbm2Le6PykXq7kS5FAF18",d:"Taiwan, 21 to 24 November."},
- {g:"AXION",t:"First Ten Days",u:"https://claude.ai/artifact/NMnH1cZTv2ypczeK7do2fQ"},
- {g:"AXION",t:"Journey Simulation",u:"https://claude.ai/artifact/4WibWEnGBhsJkTjcKJuxVx"},
- {g:"AXION",t:"Versions to Learn",u:"https://claude.ai/artifact/36BF5p3kduuaEeRpA8Ga62"},
- {g:"AXION",t:"Weekly Review",u:"https://claude.ai/artifact/BiqwztWeH8R8Vp6B9tnJ3R"},
- {g:"AXION",t:"Install Path",u:"https://claude.ai/artifact/XyJjAgbAoEGwV3ahw3rPpM"},
- {g:"AXION",t:"Audit",u:"https://claude.ai/artifact/GMyio2F4Uif87ioaPWDjyB"},
- {g:"AXION",t:"Design Pass",u:"https://claude.ai/artifact/EeBENVnMxkDXx1bPd1dhQp"},
- {g:"AXION",t:"Weekly Review (August)",u:"https://claude.ai/artifact/Qq6iT2M6o1MpiCQ5BnZQhA"},
- {g:"Other",t:"Push Copy Benchmark",u:"https://claude.ai/artifact/SdpfEUeaKMS87UXTnbtKJc"},
- {g:"Other",t:"Morning Bell",u:"https://claude.ai/artifact/BVg1CEk97LWDpuLkhLV89X"},
- {g:"Other",t:"Now vs After Deploy",u:"https://claude.ai/artifact/9zAwNAegDDh8urj9xrAyTv"},
- {g:"Other",t:"Three Skins for Lift",u:"https://claude.ai/artifact/PGuLaSJDCEnQPpv6HeW9DX"}
+ {g:"Daily",t:"Kotoba Deck",u:"/Kotoba-deck/"},
+ {g:"Daily",t:"Morning Bell",u:"/morning-bell/"},
+ {g:"Money",t:"Net Worth Ledger",u:"/net-worth/"},
+ {g:"Money",t:"Annonces Montpellier",u:"/annonces/"},
+ {g:"Trips",t:"Taipei Trip",u:"/taipei/"}
 ];
 const local=a=>a.u.startsWith("/");
 const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let sel=0;try{const s=+localStorage.getItem("hub-sel");if(APPS[s])sel=s}catch(e){}
+let sel=0;try{const s=localStorage.getItem("hub-app");const i=APPS.findIndex(a=>a.u===s);if(i>=0)sel=i}catch(e){}
 function nav(){
   const gs=[...new Set(APPS.map(a=>a.g))];
   document.getElementById("nav").innerHTML=gs.map(g=>`<div class="group"><h2>${esc(g)}</h2>${APPS.map((a,i)=>a.g!==g?"":`<button class="item" data-i="${i}" aria-current="${i===sel}"><span>${esc(a.t)}</span>${local(a)?"":'<span class="ext">↗</span>'}</button>`).join("")}</div>`).join("");
 }
 function show(i){
-  sel=i;try{localStorage.setItem("hub-sel",i)}catch(e){}
+  sel=i;try{localStorage.setItem("hub-app",APPS[i].u)}catch(e){}
   const a=APPS[i],v=document.getElementById("view");
   document.getElementById("cur").textContent=a.t;
-  v.innerHTML=local(a)?`<iframe src="${esc(a.u)}" title="${esc(a.t)}" allow="autoplay"></iframe>`
+  v.innerHTML=local(a)?`<iframe src="${esc(a.u)}" title="${esc(a.t)}" allow="autoplay; screen-wake-lock; clipboard-write"></iframe>`
     :`<div class="outside"><div><h1>${esc(a.t)}</h1><p>${esc(a.d||"")}${a.d?" ":""}This one lives in Claude, so it opens there.</p><a class="open" href="${esc(a.u)}" target="_blank" rel="noopener">Open in Claude ↗</a></div></div>`;
   nav();document.body.classList.remove("menu");
 }

@@ -1,0 +1,98 @@
+{
+ "accounts": [
+  {
+   "id": "ce-current",
+   "currency": "EUR",
+   "institution": "Caisse d'Epargne",
+   "kind": "cash",
+   "name": "Current account",
+   "order": 6.5
+  },
+  {
+   "id": "ce-loan",
+   "currency": "EUR",
+   "institution": "Caisse d'Epargne",
+   "kind": "debt",
+   "name": "Consumer loan",
+   "note": "Amount still owed",
+   "order": 9
+  },
+  {
+   "id": "livret-a",
+   "currency": "EUR",
+   "institution": "Caisse d'Epargne",
+   "kind": "savings",
+   "name": "Livret A",
+   "order": 7
+  },
+  {
+   "id": "pel",
+   "currency": "EUR",
+   "institution": "Caisse d'Epargne",
+   "kind": "savings",
+   "name": "PEL",
+   "note": "Housing savings plan",
+   "order": 8
+  },
+  {
+   "id": "prestia",
+   "currency": "JPY",
+   "institution": "SMBC Trust Bank",
+   "kind": "cash",
+   "name": "Prestia",
+   "order": 1
+  },
+  {
+   "id": "revolut-cash",
+   "currency": "JPY",
+   "institution": "Revolut",
+   "kind": "cash",
+   "name": "Revolut yen account",
+   "order": 5
+  },
+  {
+   "id": "revolut-invest",
+   "currency": "JPY",
+   "institution": "Revolut",
+   "kind": "investment",
+   "name": "Revolut investments",
+   "note": "Gold and silver",
+   "order": 6
+  },
+  {
+   "id": "sbi-nisa",
+   "currency": "JPY",
+   "institution": "SBI Securities",
+   "kind": "investment",
+   "name": "NISA",
+   "order": 2
+  },
+  {
+   "id": "sbi-taxable",
+   "currency": "JPY",
+   "institution": "SBI Securities",
+   "kind": "cash",
+   "name": "SBI account cash",
+   "note": "Waiting to be invested",
+   "order": 3
+  }
+ ],
+ "months": [
+  {
+   "id": "2026-10",
+   "balances": {
+    "ce-current": 544.54,
+    "ce-loan": -817.52,
+    "livret-a": 902.55,
+    "pel": 6750,
+    "prestia": 1537539,
+    "revolut-cash": 247504,
+    "revolut-invest": 542608,
+    "sbi-nisa": 0,
+    "sbi-taxable": 100000
+   },
+   "eurJpy": 177.63,
+   "updatedAt": "4 Oct 2026"
+  }
+ ]
+}
