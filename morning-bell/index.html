@@ -564,6 +564,7 @@ if(state.rev !== 6){
   state.rev = 6;
   save();
 }
+if(state.rev !== 7){ state.voice = true; state.rev = 7; save(); }
 if(typeof state.sound !== "boolean") state.sound = true;
 if(typeof state.vibrate !== "boolean") state.vibrate = true;
 
@@ -867,6 +868,7 @@ function buildMedia(){
 /* iOS only trusts media that a tap started, so every clip gets played silently
    once during the tap that opens a session. */
 function unlockMedia(force){
+  unlockVoiceClips();
   // Building seven WAVs costs real time on a phone, and on a host with a strict
   // media-src they cannot play anyway. Only do it if the clip engine is in use.
   if(!force && state.engine !== "media") return;
@@ -1022,7 +1024,7 @@ var speechQueued = 0, lastSpokeAt = 0;
    breath later and a little quieter, instead of landing on the same instant and
    swallowing the beep. */
 function speak(n){
-  if(!state.voice || !synth) return;
+  if(!state.voice) return;
   /* Gate on elapsed time, not on the engine reporting itself idle. Its "end"
      event fires late and unreliably, so a queue counter stays stuck high and
      drops every other count — which is how "2" went missing. Counts are a
@@ -1067,7 +1069,7 @@ if(synth){
 }
 
 function sayCue(kind, lead){
-  if(!state.voice || !synth) return;
+  if(!state.voice) return;
   var w = WORDS[kind];
   if(!w) return;
   if(lead <= 0.02){ sayNow(w, 1, true); return; }
@@ -1083,8 +1085,50 @@ function sayCue(kind, lead){
 
    `must` marks the words that carry the timer. Safari's speech queue does wedge
    over a long session, so if one never starts it gets a single retry. */
+/* Recorded words. Phone speech engines fail silently on iOS, so the count and
+   the cue words play as small audio files instead — the same media path as the
+   beep clips, which iOS keeps audible in Silent Mode. Speech is only the
+   fallback for a word without a file. */
+var CLIP_FOR = { "3":"3", "2":"2", "1":"1", "Go":"go", "Rest":"rest", "Get ready":"ready", "Cool down":"cool", "Finished":"done" };
+var VOICE_EL = null;
+function voiceClips(){
+  if(VOICE_EL) return VOICE_EL;
+  VOICE_EL = {};
+  for(var k in CLIP_FOR){
+    if(!CLIP_FOR.hasOwnProperty(k)) continue;
+    var el = new Audio("voice/" + CLIP_FOR[k] + ".mp3");
+    el.preload = "auto";
+    try { el.setAttribute("playsinline", ""); } catch(e){}
+    VOICE_EL[k] = el;
+  }
+  return VOICE_EL;
+}
+function unlockVoiceClips(){
+  if(!state.voice) return;
+  var m = voiceClips(), k, el, pr;
+  for(k in m){
+    if(!m.hasOwnProperty(k)) continue;
+    el = m[k];
+    try { el.muted = true; pr = el.play(); if(pr && pr.then) pr.then(function(){}, function(){}); el.pause(); el.currentTime = 0; el.muted = false; } catch(e){}
+  }
+}
+function playVoiceClip(n, vol, late){
+  var el = voiceClips()[String(n)];
+  if(!el) return false;
+  var go = function(){
+    try { el.volume = typeof vol === "number" ? Math.min(1, vol + 0.2) : 1; } catch(e){}
+    try { el.currentTime = 0; } catch(e){}
+    var pr = el.play();
+    if(pr && pr.catch) pr.catch(function(){ markVoice("voice blocked"); });
+  };
+  if(late) setTimeout(go, late); else go();
+  return true;
+}
+
 function sayNow(n, vol, must, isRetry){
-  if(!state.voice || !synth) return;
+  if(!state.voice) return;
+  if(playVoiceClip(n, vol, must ? 280 : 0)) return;
+  if(!synth) return;
 
   var u;
   try { u = new SpeechSynthesisUtterance(String(n)); } catch(e){ return; }
@@ -1493,7 +1537,7 @@ function paintToggles(){
     ? '<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/>'
     : '<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M16 9l5 6M21 9l-5 6"/>';
   $("vibeBtn").setAttribute("aria-pressed", state.vibrate ? "true" : "false");
-  $("voiceBtn").setAttribute("aria-pressed", (state.voice && !!synth) ? "true" : "false");
+  $("voiceBtn").setAttribute("aria-pressed", state.voice ? "true" : "false");
 }
 $("soundBtn").addEventListener("click", function(){
   state.sound = !state.sound; save(); paintToggles();
@@ -1505,7 +1549,6 @@ $("vibeBtn").addEventListener("click", function(){
   if(state.vibrate) buzz(40);
 });
 $("voiceBtn").addEventListener("click", function(){
-  if(!synth && !state.voice){ alert("This browser cannot speak the count. The beeps still work."); return; }
   state.voice = !state.voice; save(); paintToggles();
   if(state.voice) speak(3); else hushVoice();
 });
