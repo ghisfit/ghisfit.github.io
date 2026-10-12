@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1D5FA6">
+<style>body{margin:0}:root{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}</style>
+<title>Home Base</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: site header with section links, a row of live dashboards, then quieter lists by theme. */
+:root {
+  --bg: #F2F5F8; --surface: #FFFFFF; --ink: #15202B; --muted: #5C6B7A; --line: #D6DDE5;
+  --accent: #1D5FA6; --accent-soft: #E3EDF8;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F151B; --surface: #172029; --ink: #E7EDF3; --muted: #93A2B1; --line: #2A3743;
+    --accent: #74ABEA; --accent-soft: #1C2C3E; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F151B; --surface: #172029; --ink: #E7EDF3; --muted: #93A2B1; --line: #2A3743;
+  --accent: #74ABEA; --accent-soft: #1C2C3E; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar-in { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 12px; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
+nav { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+nav a:hover { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 56px; display: flex; flex-direction: column; gap: 32px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(1.7rem, 6vw, 2.4rem); line-height: 1.1; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+section { display: flex; flex-direction: column; gap: 12px; min-width: 0; scroll-margin-top: 72px; }
+h2 { font-family: var(--display); font-weight: 500; font-size: 1.1rem; margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.card { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: 10px; padding: 16px; text-decoration: none; color: var(--ink); min-width: 0; }
+.card:hover { border-color: var(--accent); }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
+.card strong { font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1.2; }
+.card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.go { margin-top: auto; color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+.rows { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.row { display: flex; gap: 12px; justify-content: space-between; align-items: baseline; padding: 12px 16px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.row:last-child { border-bottom: 0; }
+.row:hover span:first-child { color: var(--accent); }
+.row span:first-child { font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.row .when { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 20px 16px; color: var(--muted); margin: 0; }
+</style>
+</head><body>
+
+<div class="bar"><div class="bar-in">
+  <span class="brand">Home Base</span>
+  <nav id="nav" aria-label="Sections"></nav>
+</div></div>
+
+<div class="wrap">
+  <header>
+    <h1>Everything you've built, in one place</h1>
+    <p class="sub" id="asof"></p>
+  </header>
+  <div id="content"><p class="empty">Your dashboards will appear here as cards. Tap one to open it.</p></div>
+</div>
+
+<script>
+(function () {
+  var GROUPS = ["Learning", "Money", "Trips", "AXION", "Other"], links = [{"title": "Kotoba Deck", "desc": "Japanese flashcards with audio, N5 to N3.", "featured": true, "group": "Learning", "order": 1, "updated": "2026-10-12", "url": "https://ghisfit.github.io/Kotoba-deck/"}, {"title": "Net Worth Ledger", "desc": "Monthly balances across Japan, Revolut and France.", "featured": true, "group": "Money", "order": 2, "updated": "2026-10-04", "url": "https://claude.ai/artifact/Ch36gd7cMiUQiTKsHtkhA9"}, {"title": "Annonces Montpellier", "desc": "Apartments for sale under €120,000, with rent against loan payment.", "featured": true, "group": "Money", "order": 3, "updated": "2026-10-04", "url": "https://claude.ai/artifact/4VK7XT2L4CB1LZmzxHFq7d"}, {"title": "Taipei Trip", "desc": "Taiwan trip, 21 to 24 November.", "featured": true, "group": "Trips", "order": 4, "updated": "2026-09-28", "url": "https://claude.ai/artifact/5jbm2Le6PykXq7kS5FAF18"}, {"title": "Argent, dépenses et cartes — plan 2026", "group": "Money", "updated": "2026-09-22", "url": "https://claude.ai/artifact/9TUtZNU3ecLusTCBCpnn7z"}, {"title": "AXION First Ten Days", "group": "AXION", "updated": "2026-10-03", "url": "https://claude.ai/artifact/NMnH1cZTv2ypczeK7do2fQ"}, {"title": "AXION Journey Simulation", "group": "AXION", "updated": "2026-09-28", "url": "https://claude.ai/artifact/4WibWEnGBhsJkTjcKJuxVx"}, {"title": "AXION Versions to Learn", "group": "AXION", "updated": "2026-09-28", "url": "https://claude.ai/artifact/36BF5p3kduuaEeRpA8Ga62"}, {"title": "AXION Weekly Review", "group": "AXION", "updated": "2026-09-27", "url": "https://claude.ai/artifact/BiqwztWeH8R8Vp6B9tnJ3R"}, {"title": "AXION Install Path", "group": "AXION", "updated": "2026-09-26", "url": "https://claude.ai/artifact/XyJjAgbAoEGwV3ahw3rPpM"}, {"title": "Axion Audit", "group": "AXION", "updated": "2026-09-24", "url": "https://claude.ai/artifact/GMyio2F4Uif87ioaPWDjyB"}, {"title": "AXION Design Pass", "group": "AXION", "updated": "2026-08-29", "url": "https://claude.ai/artifact/EeBENVnMxkDXx1bPd1dhQp"}, {"title": "AXION Weekly Review (August)", "group": "AXION", "updated": "2026-08-15", "url": "https://claude.ai/artifact/Qq6iT2M6o1MpiCQ5BnZQhA"}, {"title": "Push Copy Benchmark", "group": "Other", "updated": "2026-09-27", "url": "https://claude.ai/artifact/SdpfEUeaKMS87UXTnbtKJc"}, {"title": "Morning Bell", "group": "Other", "updated": "2026-09-25", "url": "https://claude.ai/artifact/BVg1CEk97LWDpuLkhLV89X"}, {"title": "Now vs After Deploy", "group": "Other", "updated": "2026-08-31", "url": "https://claude.ai/artifact/9zAwNAegDDh8urj9xrAyTv"}, {"title": "Three Skins for Lift", "group": "Other", "updated": "2026-08-31", "url": "https://claude.ai/artifact/PGuLaSJDCEnQPpv6HeW9DX"}];
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function ok(u) { return /^https:\/\//.test(String(u || "")); }
+  function slug(g) { return String(g).toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
+
+  function render() {
+    var good = links.filter(function (l) { return ok(l.url) && l.title; });
+    if (!good.length) { $("asof").textContent = "No pages listed yet. Ask Claude to add your artifacts."; return; }
+    $("asof").textContent = good.length + " apps and pages. Links to Claude pages open in Claude.";
+    var feat = good.filter(function (l) { return l.featured; }).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+    var groups = GROUPS.slice();
+    good.forEach(function (l) { if (l.group && groups.indexOf(l.group) < 0) groups.push(l.group); });
+    var html = "", nav = [];
+    if (feat.length) {
+      nav.push('<a href="#dashboards">Dashboards</a>');
+      html += '<section id="dashboards"><h2>Live dashboards</h2><div class="grid">' + feat.map(function (l) {
+        return '<a class="card" href="' + esc(l.url) + '" target="_blank" rel="noopener"><span class="label">' + esc(l.group || "") + "</span><strong>" +
+          esc(l.title) + "</strong>" + (l.desc ? "<p>" + esc(l.desc) + "</p>" : "") + '<span class="go">Open →</span></a>';
+      }).join("") + "</div></section>";
+    }
+    groups.forEach(function (g) {
+      var items = good.filter(function (l) { return l.group === g && !l.featured; })
+        .sort(function (a, b) { return String(b.updated || "").localeCompare(String(a.updated || "")); });
+      if (!items.length) return;
+      nav.push('<a href="#' + slug(g) + '">' + esc(g) + "</a>");
+      html += '<section id="' + slug(g) + '"><h2>' + esc(g) + '</h2><div class="rows">' + items.map(function (l) {
+        return '<a class="row" href="' + esc(l.url) + '" target="_blank" rel="noopener"><span>' + esc(l.title) + '</span><span class="when">' + esc(l.updated || "") + "</span></a>";
+      }).join("") + "</div></section>";
+    });
+    $("nav").innerHTML = nav.join("");
+    $("content").innerHTML = html;
+    $("content").style.display = "flex"; $("content").style.flexDirection = "column"; $("content").style.gap = "32px";
+  }
+
+  render();
+})();
+</script>
+</body></html>
