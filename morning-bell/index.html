@@ -1090,36 +1090,40 @@ function sayCue(kind, lead){
    beep clips, which iOS keeps audible in Silent Mode. Speech is only the
    fallback for a word without a file. */
 var CLIP_FOR = { "3":"3", "2":"2", "1":"1", "Go":"go", "Rest":"rest", "Get ready":"ready", "Cool down":"cool", "Finished":"done" };
-var VOICE_EL = null;
-function voiceClips(){
-  if(VOICE_EL) return VOICE_EL;
-  VOICE_EL = {};
-  for(var k in CLIP_FOR){
-    if(!CLIP_FOR.hasOwnProperty(k)) continue;
-    var el = new Audio("voice/" + CLIP_FOR[k] + ".mp3");
-    el.preload = "auto";
-    try { el.setAttribute("playsinline", ""); } catch(e){}
-    VOICE_EL[k] = el;
-  }
-  return VOICE_EL;
+/* One audio element carries every word. iOS lets a page play sound later only
+   through an element that a tap already started, and it counts that start only
+   if the play actually begins — a play() paused in the same instant does not
+   unlock anything. So the Start tap begins a real (muted) play of one word and
+   pauses it once it is running; every word after that swaps the source on the
+   same, already-unlocked element. */
+var VOX = null, voxReady = false;
+function vox(){
+  if(VOX) return VOX;
+  VOX = new Audio();
+  VOX.preload = "auto";
+  try { VOX.setAttribute("playsinline", ""); } catch(e){}
+  return VOX;
 }
 function unlockVoiceClips(){
   if(!state.voice) return;
-  var m = voiceClips(), k, el, pr;
-  for(k in m){
-    if(!m.hasOwnProperty(k)) continue;
-    el = m[k];
-    try { el.muted = true; pr = el.play(); if(pr && pr.then) pr.then(function(){}, function(){}); el.pause(); el.currentTime = 0; el.muted = false; } catch(e){}
-  }
+  var el = vox();
+  try {
+    el.muted = true;
+    el.src = "voice/ready.mp3";
+    var pr = el.play();
+    var settle = function(){ try { el.pause(); el.currentTime = 0; } catch(e){} el.muted = false; voxReady = true; };
+    if(pr && pr.then) pr.then(function(){ setTimeout(settle, 60); }, function(){ el.muted = false; markVoice("voice blocked"); });
+    else settle();
+  } catch(e){}
 }
 function playVoiceClip(n, vol, late){
-  var el = voiceClips()[String(n)];
-  if(!el) return false;
+  var name = CLIP_FOR[String(n)];
+  if(!name) return false;
   var go = function(){
-    try { el.volume = typeof vol === "number" ? Math.min(1, vol + 0.2) : 1; } catch(e){}
-    try { el.currentTime = 0; } catch(e){}
+    var el = vox();
+    try { el.muted = false; el.src = "voice/" + name + ".mp3"; } catch(e){}
     var pr = el.play();
-    if(pr && pr.catch) pr.catch(function(){ markVoice("voice blocked"); });
+    if(pr && pr.catch) pr.catch(function(err){ markVoice("voice blocked" + (err && err.name ? " (" + err.name + ")" : "")); });
   };
   if(late) setTimeout(go, late); else go();
   return true;

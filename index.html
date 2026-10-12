@@ -85,7 +85,7 @@ function show(i){
   sel=i;try{localStorage.setItem("hub-app",APPS[i].u)}catch(e){}
   const a=APPS[i],v=document.getElementById("view");
   document.getElementById("cur").textContent=a.t;
-  v.innerHTML=local(a)?`<iframe src="${esc(a.u)}" title="${esc(a.t)}" allow="autoplay; screen-wake-lock; clipboard-write"></iframe>`
+  v.innerHTML=local(a)?`<iframe src="${esc(a.u)}?v=${Date.now().toString(36)}" title="${esc(a.t)}" allow="autoplay; screen-wake-lock; clipboard-write"></iframe>`
     :`<div class="outside"><div><h1>${esc(a.t)}</h1><p>${esc(a.d||"")}${a.d?" ":""}This one lives in Claude, so it opens there.</p><a class="open" href="${esc(a.u)}" target="_blank" rel="noopener">Open in Claude ↗</a></div></div>`;
   nav();document.body.classList.remove("menu");
 }
