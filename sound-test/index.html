@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sound test</title>
+<style>
+body{margin:0;font:17px system-ui,-apple-system,sans-serif;background:#f4f1ea;color:#2b2a26;padding:24px 16px}
+@media (prefers-color-scheme:dark){body{background:#1b1d1a;color:#e9e4d8}}
+h1{font-size:22px;margin:0 0 6px}p{margin:0 0 18px;opacity:.75}
+button{display:block;width:100%;font:600 18px system-ui;padding:18px;margin:0 0 6px;border:0;border-radius:12px;background:#5f7a5f;color:#fff}
+.r{min-height:22px;margin:0 0 18px;font-size:15px}
+</style></head><body>
+<h1>Sound test</h1>
+<p>Tap each button once and tell Claude which ones you hear.</p>
+<button id="a">1. Audio file (a word)</button><div class="r" id="ra"></div>
+<button id="b">2. Generated beep</button><div class="r" id="rb"></div>
+<button id="c">3. Phone voice</button><div class="r" id="rc"></div>
+<script>
+const $=id=>document.getElementById(id);
+$("a").onclick=()=>{const el=new Audio("../morning-bell/voice/c-work.mp3");const p=el.play();
+ if(p&&p.then)p.then(()=>$("ra").textContent="Playing…",e=>$("ra").textContent="Blocked: "+e.name+" "+e.message);
+ el.onended=()=>$("ra").textContent="Finished playing";el.onerror=()=>$("ra").textContent="File error "+(el.error&&el.error.code)};
+$("b").onclick=()=>{try{const C=window.AudioContext||window.webkitAudioContext,x=new C(),o=x.createOscillator(),g=x.createGain();
+ o.frequency.value=880;g.gain.value=.5;o.connect(g);g.connect(x.destination);o.start();o.stop(x.currentTime+.6);
+ $("rb").textContent="Started, audio state: "+x.state}catch(e){$("rb").textContent="Error: "+e.message}};
+$("c").onclick=()=>{try{const u=new SpeechSynthesisUtterance("three, two, one, go");u.lang="en-US";
+ u.onstart=()=>$("rc").textContent="Speaking…";u.onend=()=>$("rc").textContent="Finished speaking";u.onerror=e=>$("rc").textContent="Error: "+e.error;
+ speechSynthesis.speak(u);$("rc").textContent="Asked to speak…"}catch(e){$("rc").textContent="Not available: "+e.message}};
+</script></body></html>
