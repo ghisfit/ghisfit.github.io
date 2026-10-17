@@ -473,7 +473,16 @@ input{font:inherit;color:inherit}
    Silent Mode, and it ducks other audio for its length instead of seizing the
    session, so music carries on. Native timer apps do exactly this through
    AVAudioSession; this is the same knob exposed to the web. */
-function claimAudioSession(){}
+function claimAudioSession(){
+  /* "playback" is the category iOS lets through the silent switch, like a timer
+     or music app. It only applies if no Web Audio context ever starts, because
+     WebKit then drops the page into the ambient category, which the switch mutes. */
+  try {
+    var eng = (typeof state === "object" && state) ? state.engine : "media";
+    if(eng !== "tone" && navigator.audioSession && navigator.audioSession.type !== "playback")
+      navigator.audioSession.type = "playback";
+  } catch(e){}
+}
 claimAudioSession();
 
 /* ============================ data ============================ */
@@ -633,7 +642,7 @@ function setPlaybackSession(){
 }
 
 function ensureAudio(){
-  if(!AC) return null;
+  if(!AC || state.engine !== "tone") return null;
   setPlaybackSession();
   if(!ctx){
     try { ctx = new AC(); } catch(e){ return null; }
@@ -653,6 +662,7 @@ function ensureAudio(){
    real tap. Playing a one-frame silent buffer during the tap is what opens the
    gate; everything scheduled afterwards is then allowed through. */
 function unlockAudio(){
+  if(state.engine !== "tone") { claimAudioSession(); return; }
   ensureAudio();
   setPlaybackSession();     // some iOS builds only honour this after the context exists
   if(!ctx) return;
