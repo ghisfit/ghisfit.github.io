@@ -473,17 +473,7 @@ input{font:inherit;color:inherit}
    Silent Mode, and it ducks other audio for its length instead of seizing the
    session, so music carries on. Native timer apps do exactly this through
    AVAudioSession; this is the same knob exposed to the web. */
-function claimAudioSession(){
-  try {
-    /* "transient" respects the iPhone silent switch, so with the phone on silent
-       every sound was muted. "playback" plays through it, like a timer app.
-       It does pause music; switching to "Beeps: with music" goes back to
-       "transient". Before state loads, assume playback (the default engine). */
-    var want = (typeof state === "object" && state && state.engine === "tone") ? "transient" : "playback";
-    if(navigator.audioSession && navigator.audioSession.type !== want)
-      navigator.audioSession.type = want;
-  } catch(e){}
-}
+function claimAudioSession(){}
 claimAudioSession();
 
 /* ============================ data ============================ */
@@ -866,7 +856,7 @@ function buildMedia(){
     // With the count on, each cue is one file holding the beep and then the
     // word. iOS plays one media clip at a time, so a separate voice clip would
     // cut the beep off; baked together they never collide.
-    var el = new Audio(state.voice && COMBO[k] ? "voice/c-" + k + ".mp3" : wavUri(SPECS[k]));
+    var el = new Audio(state.voice && COMBO[k] ? "voice/c-" + k + ".mp3" : "voice/b-" + k + ".mp3");
     el.preload = "auto";
     try { el.setAttribute("playsinline", ""); } catch(e){}
     MEDIA[k] = el;
@@ -1480,22 +1470,14 @@ $("levelBtn").addEventListener("click", function(){
    this phone lets through, instead of guessing from "I hear nothing".
    NOTE: the clip half will interrupt music. Only for deliberate testing. */
 $("testBtn").addEventListener("click", function(){
-  unlockAudio();
-  unlockMedia(true);
-  // Turn sound ON rather than bypassing the mute for the duration of the test.
-  // A test that passes while the app is muted is worse than no test.
-  if(!state.sound){ state.sound = true; save(); paintToggles(); }
-  var was = state.sound;
-
-  sayNow("One", 1);
-  if(ctx) VOICES.work(ctx.currentTime + 0.6);          // engine A: Web Audio
-  setTimeout(function(){ sayNow("Two", 1); }, 1900);
-  setTimeout(function(){ playMedia("work"); }, 2600);  // engine B: media clip
-
-  state.sound = was;
-  paintAudioStatus('listen for: "One" + beep, then "Two" + beep');
-  setTimeout(function(){ paintAudioStatus(); }, 7000);
+  var el = new Audio("voice/c-work.mp3");
+  var pr = el.play();
+  paintAudioStatus("Playing test sound…");
+  if(pr && pr.then) pr.then(function(){ el.onended = function(){ paintAudioStatus("Test sound finished. If you heard nothing, check volume and Bluetooth."); }; },
+    function(e){ paintAudioStatus("Sound blocked: " + (e && e.name)); });
+  unlockAudio(); unlockMedia(true);
 });
+
 
 function paintToggles(){
   $("soundBtn").setAttribute("aria-pressed", state.sound ? "true" : "false");
