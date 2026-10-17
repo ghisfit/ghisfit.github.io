@@ -475,8 +475,13 @@ input{font:inherit;color:inherit}
    AVAudioSession; this is the same knob exposed to the web. */
 function claimAudioSession(){
   try {
-    if(navigator.audioSession && navigator.audioSession.type !== "transient")
-      navigator.audioSession.type = "transient";
+    /* "transient" respects the iPhone silent switch, so with the phone on silent
+       every sound was muted. "playback" plays through it, like a timer app.
+       It does pause music; switching to "Beeps: with music" goes back to
+       "transient". Before state loads, assume playback (the default engine). */
+    var want = (typeof state === "object" && state && state.engine === "tone") ? "transient" : "playback";
+    if(navigator.audioSession && navigator.audioSession.type !== want)
+      navigator.audioSession.type = want;
   } catch(e){}
 }
 claimAudioSession();
