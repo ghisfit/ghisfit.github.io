@@ -474,13 +474,14 @@ input{font:inherit;color:inherit}
    session, so music carries on. Native timer apps do exactly this through
    AVAudioSession; this is the same knob exposed to the web. */
 function claimAudioSession(){
-  /* "playback" is the category iOS lets through the silent switch, like a timer
-     or music app. It only applies if no Web Audio context ever starts, because
-     WebKit then drops the page into the ambient category, which the switch mutes. */
+  /* With music (default): "ambient" mixes the beeps over Spotify and never stops it,
+     but the silent switch mutes them. Over silent: "playback" plays through the
+     silent switch but pauses music. iOS offers web pages no way to have both. */
   try {
-    var eng = (typeof state === "object" && state) ? state.engine : "media";
-    if(eng !== "tone" && navigator.audioSession && navigator.audioSession.type !== "playback")
-      navigator.audioSession.type = "playback";
+    var mix = !(typeof state === "object" && state && state.mix === false);
+    var want = mix ? "ambient" : "playback";
+    if(navigator.audioSession && navigator.audioSession.type !== want)
+      navigator.audioSession.type = want;
   } catch(e){}
 }
 claimAudioSession();
@@ -569,6 +570,7 @@ if(state.rev !== 6){
   save();
 }
 if(state.rev !== 7){ state.voice = true; state.engine = "media"; state.rev = 7; save(); }
+if(state.rev !== 8){ state.mix = true; state.engine = "media"; state.rev = 8; save(); }
 if(typeof state.sound !== "boolean") state.sound = true;
 if(typeof state.vibrate !== "boolean") state.vibrate = true;
 
@@ -1441,7 +1443,7 @@ function paintAudioStatus(extra){
   } catch(e){}
   if(!state.sound) bits.push("MUTED IN THE APP — tap the speaker icon");
   $("levelBtn").textContent = "Beep: " + LEVEL_NAMES[(state.beepLevel || 2) - 1];
-  $("engineBtn").textContent = state.engine === "tone" ? "Beeps: with music" : "Beeps: over silent";
+  $("engineBtn").textContent = state.mix !== false ? "Mode: with music" : "Mode: over silent";
   if(extra) bits.push(extra);
   el.textContent = bits.join(" · ");
 }
@@ -1452,18 +1454,16 @@ function paintAudioStatus(extra){
    choice. The media code stays for the test below only. */
 
 $("engineBtn").addEventListener("click", function(){
-  state.engine = state.engine === "tone" ? "media" : "tone";
-  save();
-  unlockAudio(); unlockMedia(true);
-  var keep = state.sound;
-  state.sound = true;
-  emit("work", 0.03, null);
-  state.sound = keep;
-  paintAudioStatus(state.engine === "tone"
-    ? "mixes with music, needs Silent Mode OFF"
-    : "plays in Silent Mode, but music will stop");
-  setTimeout(function(){ paintAudioStatus(); }, 5000);
+  state.mix = state.mix === false;   // toggle
+  state.engine = "media";
+  save(); paintToggles();
+  try { if(navigator.audioSession) navigator.audioSession.type = state.mix ? "ambient" : "playback"; } catch(e){}
+  unlockMedia(true); emit("work", 0.03, null);
+  paintAudioStatus(state.mix ? "Music keeps playing. Turn Silent Mode OFF to hear the beeps."
+                             : "Plays in Silent Mode, but your music will pause.");
+  setTimeout(function(){ paintAudioStatus(); }, 6000);
 });
+
 
 $("levelBtn").addEventListener("click", function(){
   state.beepLevel = (state.beepLevel || 2) % 3 + 1;   // soft → medium → loud → soft
